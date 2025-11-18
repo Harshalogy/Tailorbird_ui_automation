@@ -1,0 +1,16 @@
+{
+  "dashboardUrl": "https://beta.tailorbird.com/financials/capex",
+  "expectedLabels": [
+    "Properties",
+    "Projects & Jobs",
+    "Financials",
+    "Category",
+    "Budget",
+    "CapEx",
+    "Trackers",
+    "Unit Tracker",
+    "Documents",
+    "Files",
+    "Images"
+  ]
+}

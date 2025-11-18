@@ -1,0 +1,32 @@
+{
+  "name": "tailorbird_ui_automation",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:headed": "npx playwright test --headed ",
+    "test:login": "npx playwright test tests/login.spec.js && npx playwright show-report",
+    "test:projectJob": "npx playwright test TC02 TC03",
+    "test:full": "npm install && npx playwright install && npx playwright test --headed",
+    "test:fullProperty": "npm install && npx playwright install && cross-env OPTION=\"Creekstone at RTP\" npx playwright test TC02 --headed"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Harshalogy/Tailorbird_ui_automation.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Harshalogy/Tailorbird_ui_automation/issues"
+  },
+  "homepage": "https://github.com/Harshalogy/Tailorbird_ui_automation#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@types/node": "^24.10.1"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3"
+  }
+}
