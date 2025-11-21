@@ -18,10 +18,16 @@ jobs:
       with:
         node-version: lts/*
 
-    - name: Load .env file
+    # ---- SAFE .env LOADING ----
+    - name: Load .env file safely
       run: |
         echo "Loading environment variables from .env"
-        export $(grep -v '^#' .env | xargs)
+        while IFS='=' read -r key value; do
+          if [[ ! -z "$key" && "$key" != \#* ]]; then
+            echo "Exporting $key"
+            export "$key=$value"
+          fi
+        done < .env
       shell: bash
 
     - name: Install dependencies
@@ -39,3 +45,24 @@ jobs:
         name: playwright-report
         path: playwright-report/
         retention-days: 30
+
+    # ---- DEPLOY REPORT TO GITHUB PAGES ----
+    - name: Upload report to GitHub Pages
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: playwright-report/
+
+  deploy:
+    needs: test
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4

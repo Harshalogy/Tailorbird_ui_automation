@@ -73,4 +73,4 @@ command -v node >/dev/null 2>&1 || { echo "Node.js not found. Installing..."; su
 ## 📊 View Test Results (GitHub Actions)
 
 You can view the latest Playwright HTML test reports published from GitHub Actions here:
-👉 https://harshalogy.github.io/tailorbird/
+👉 https://harshalogy.github.io/Tailorbird_ui_automation/
