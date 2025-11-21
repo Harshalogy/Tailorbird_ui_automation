@@ -10,7 +10,7 @@ Install [Node.js](https://nodejs.org/) and [Visual Studio Code](https://code.vis
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/Harshalogy/tailorbird.git  
+git clone https://github.com/Harshalogy/Tailorbird_ui_automation.git  
 ```
 Open the Folder in Visual Code
 
@@ -57,15 +57,15 @@ npx playwright show-report
 ## Run these tests in Terminal
 ## 🟢 PowerShell (Windows)
 ```bash
-git clone https://github.com/Harshalogy/tailorbird.git; cd tailorbird; npm install; npx playwright install chromium; npx playwright test --headed; npx playwright show-report
+git clone https://github.com/Harshalogy/Tailorbird_ui_automation.git; cd Tailorbird_ui_automation; npm install; npx playwright install chromium; npx playwright test --headed; npx playwright show-report
 ```
 ## 🟠 Command Prompt (CMD) or macOS/Linux Terminal
 ```bash
-git clone https://github.com/Harshalogy/tailorbird.git && cd tailorbird && npm install && npx playwright install chromium && npx playwright test --headed && npx playwright show-report
+git clone https://github.com/Harshalogy/Tailorbird_ui_automation.git && cd Tailorbird_ui_automation && npm install && npx playwright install chromium && npx playwright test --headed && npx playwright show-report
 ```
 ## 🟠 If Node.js is also not install, run this command
 ```bash
-command -v node >/dev/null 2>&1 || { echo "Node.js not found. Installing..."; sudo apt update && sudo apt install -y nodejs npm; } && git clone https://github.com/Harshalogy/tailorbird.git && cd tailorbird && npm install && npx playwright install chromium && npx playwright test --headed && npx playwright show-report
+command -v node >/dev/null 2>&1 || { echo "Node.js not found. Installing..."; sudo apt update && sudo apt install -y nodejs npm; } && git clone https://github.com/Harshalogy/Tailorbird_ui_automation.git && cd Tailorbird_ui_automation && npm install && npx playwright install chromium && npx playwright test --headed && npx playwright show-report
 ```
 
 
