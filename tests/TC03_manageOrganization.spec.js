@@ -10,8 +10,8 @@ test.beforeAll(async ({ browser }) => {
   page = await context.newPage();
   org = new OrganizationHelper(page);
   await org.goto(data.dashboardUrl);
-  await org.goto(data.organizationUrl);
-  await expect(page).toHaveURL(/organization/);
+  // await org.goto(data.organizationUrl);
+  await org.goToOrganization();  
 });
 
 test.afterAll(async () => {

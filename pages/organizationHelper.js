@@ -27,6 +27,18 @@ class OrganizationHelper {
     }
   }
 
+  async goToOrganization() {
+    await this.page.locator('div[aria-haspopup="menu"]').waitFor({ state: "visible" });
+    await this.page.locator('div[aria-haspopup="menu"]').click();
+
+    await this.page.locator("button:has-text('Manage Organization')").waitFor({ state: "visible" });
+    await this.page.locator("button:has-text('Manage Organization')").click();
+
+    await this.page.locator(".mantine-Breadcrumbs-root:has-text('Organization')").waitFor({ state: "visible" });
+    await expect(this.page).toHaveURL(/.*\/organization/);
+
+  }
+
   async openInvite() {
     try {
       this.log("Opening Invite User dialog...");
