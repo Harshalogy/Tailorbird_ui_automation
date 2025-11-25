@@ -97,7 +97,6 @@ class PropertiesHelper {
     }
 
     async changeView(view) {
-
         // Table View
         // Grid View
         await this.page.waitForLoadState("networkidle");
@@ -179,7 +178,7 @@ class PropertiesHelper {
         await expect(firstRowNameCell).toHaveText(name);
 
         console.log(`Search successful → Found: ${name}`);
-        await this.page.locator('input[placeholder="Search..."]').clear();
+        // await this.page.locator('input[placeholder="Search..."]').clear();
     }
 
     async deleteProperty(name) {

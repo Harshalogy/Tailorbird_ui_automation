@@ -33,7 +33,7 @@ export default defineConfig({
 
   /* Shared settings for all projects */
   use: {
-    headless: true,
+    headless: false,
     viewport: { width: 1280, height: 720 },
     actionTimeout: 55 * 1000,
 
