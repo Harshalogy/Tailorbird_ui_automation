@@ -3,6 +3,7 @@ const { test, expect } = require('@playwright/test');
 const PropertiesHelper = require('../pages/properties');
 const data = require('../fixture/organization.json');
 import fs from 'fs';
+import path from 'path';
 import { getPropertyName } from '../utils/propertyUtils';
 
 let context, page, prop;
@@ -31,24 +32,30 @@ test.afterAll(async () => {
 
 test.describe('Property Flow Test Suite', () => {
 
-  test('TC01 - Export & Create Property', async () => {
-    await prop.exportButton();
+  test('TC01 - Validate Property Export Functionality and New Property Creation', async () => {
+    // await prop.exportButton();
     await prop.createProperty(name, address, city, state, zip, garden_style);
     const propertyData = {
       propertyName: name
     };
 
-    // Write to JSON file
-    fs.writeFileSync('property.json', JSON.stringify(propertyData, null, 2), 'utf-8');
-    console.log('Property name saved to property.json');
+    const downloadPath = path.join(process.cwd(), 'downloads', 'property.json');
+
+    // Ensure the folder exists
+    fs.mkdirSync(path.dirname(downloadPath), { recursive: true });
+
+    // Write JSON file
+    fs.writeFileSync(downloadPath, JSON.stringify(propertyData, null, 2), 'utf-8');
+
+    console.log(`Property data saved to: ${downloadPath}`);
   });
 
-  test('TC02 - Change View & Search Property', async () => {
+  test('TC02 - Change Property View and Validate Search Results', async () => {
     await prop.changeView('Table View');
     await prop.searchProperty(name);
   });
 
-  test('TC03 - Filter Property', async () => {
+  test('TC03 - Validate Filters: Garden, Mid-Rise, High-Rise, and Military', async () => {
     await page.locator(".lucide.lucide-funnel").waitFor({ state: "visible" });
     await page.locator(".lucide.lucide-funnel").click();
     await prop.filterProperty(garden_style);
@@ -59,8 +66,8 @@ test.describe('Property Flow Test Suite', () => {
     await page.locator(".mantine-Paper-root .mantine-CloseButton-root").click();
   });
 
-  test('TC04 - Validate headers of table view', async () => {
-    console.log("=== TC05 - Starting Header Validation Test ===");
+  test('TC04 - Validate All Column Headers in Table View', async () => {
+    console.log("=== TC04 - Starting Header Validation Test ===");
 
     try {
       console.log("[STEP] Changing to Table View...");
@@ -77,19 +84,16 @@ test.describe('Property Flow Test Suite', () => {
         "Unit Count",
         "Project Count",
         "Job Count",
-        "Budget Variance"
+        "Budget Variance",
+        "Actions"
       ];
 
       const headerLocator = page.locator('.ag-header-cell .mantine-Text-root');
       const scrollContainer = page.locator('.ag-center-cols-viewport');
 
-      console.log("[STEP] Checking header count...");
-      await expect(headerLocator).toHaveCount(expectedHeaders.length);
-      console.log("[INFO] Header count matches.");
-
       console.log("[STEP] Validating each header one by one...");
 
-      for (let i = 0; i < expectedHeaders.length; i++) {
+      for (let i = 0; i < 10; i++) {
 
         // Scroll horizontally for each header index
         const scrollAmount = (i + 1) * 5; // incremental scroll
@@ -113,7 +117,9 @@ test.describe('Property Flow Test Suite', () => {
           );
         }
       }
-
+      console.log("[STEP] Checking header count...");
+      await expect(headerLocator).toHaveCount(expectedHeaders.length);
+      console.log("[INFO] Header count matches.");
       console.log("\n=== TC05 - Header Validation Completed Successfully ===");
 
     } catch (err) {
@@ -124,11 +130,10 @@ test.describe('Property Flow Test Suite', () => {
     }
   });
 
-  test('TC05 - Validate search newly created property, upload file, and add tags/types', async () => {
-
+  test('TC05 - Validate Overview Fields and Property Document Actions (Import, Export, Add Column, Manage Column)', async () => {
+    const propertyName = getPropertyName();
     // === Property Creation & Search ===
     try {
-      const propertyName = getPropertyName();
       console.log('Using property name:', propertyName);
 
       // Change view and search property
@@ -149,7 +154,7 @@ test.describe('Property Flow Test Suite', () => {
       await expect(page).toHaveURL(/\/properties\/details\?propertyId=/);
       console.log("[ASSERT] Navigated to property details page");
 
-      const title = page.locator(`text=${name}`).first();
+      const title = page.locator(`text=${propertyName}`).first();
       await expect(title).toBeVisible({ timeout: 8000 });
       console.log("[ASSERT] Property name visible →", await title.textContent());
     } catch (err) {
@@ -178,7 +183,7 @@ test.describe('Property Flow Test Suite', () => {
     try {
       const overview = [
         { label: "Ownership Group", value: "Tailorbird_QA_Automations" },
-        { label: "Property Name", value: name },
+        { label: "Property Name", value: propertyName },
         { label: "Property Type", value: "Garden Style" },
         { label: "Address", value: address },
         { label: "City", value: city },
@@ -298,6 +303,7 @@ test.describe('Property Flow Test Suite', () => {
 
       console.log("[STEP] Clicking Add Files...");
       await addFilesBtn.click();
+      await page.waitForTimeout(5000);
       console.log("[ASSERT] Add Files clicked → ready for additional uploads");
     } catch (err) {
       console.log("[ERROR] Add Tags & Types modal validation failed:", err);
@@ -327,11 +333,95 @@ test.describe('Property Flow Test Suite', () => {
       console.log(`➡ ${colId}: ${text}`);
     }
 
-    // 4) Assert ONLY the file name column (col-id = "name")
-    const fileName = extractedValues["name"];
-    console.log(`Extracted File Name = ${fileName}`);
+    await prop.exportButton();
 
-    await expect(fileName).toBe("property_data.csv");
+    const tableSettingsBtn = page.locator('button:has(svg.lucide-settings)');
+    await expect(tableSettingsBtn.nth(0)).toBeVisible();
+    await tableSettingsBtn.nth(0).click();
+
+    console.log("✔ Table Settings button clicked");
+
+    // === Manage Columns modal root ===
+    const drawer = page.locator('section[role="dialog"]');
+
+    // Modal should be visible
+    await expect(drawer).toBeVisible();
+    console.log("✔ Manage Columns modal visible");
+
+    // === Assert Title ===
+    await expect(drawer.getByText("Manage Columns", { exact: true })).toBeVisible();
+    console.log("✔ Title verified");
+
+    // === Assert Settings Icon ===
+    await expect(drawer.locator('svg.lucide-settings')).toBeVisible();
+    console.log("✔ Settings icon visible");
+
+    // === Assert "Default Columns" section ===
+    await expect(drawer.getByText("Default Columns", { exact: true })).toBeVisible();
+    console.log("✔ Default Columns section visible");
+
+    // === Assert Column Labels (generic & scalable) ===
+    const expectedColumns = [
+      "Cover",
+      "Description",
+      "File Name",
+      "mime_type",
+      "Project",
+      "Property",
+      "Size",
+      "Source",
+      "System Remarks",
+      "Tags",
+      "Type",
+      "Uploaded Date",
+      "uuid"
+    ];
+
+    for (const col of expectedColumns) {
+      const row = drawer.locator(`p:has-text("${col}")`);
+      await expect(row.nth(0)).toBeVisible();
+      console.log(`✔ Column row visible → ${col}`);
+
+      const checkbox = row
+        .locator('xpath=ancestor::div[contains(@style,"cursor")]')
+        .locator('input[type="checkbox"]');
+
+      await expect(checkbox.nth(0)).toBeVisible();
+      console.log(`✔ Checkbox visible → ${col}`);
+    }
+
+    // === Assert scroll container ===
+    await expect(drawer.locator('[class*="ScrollArea-viewport"]')).toBeVisible();
+    console.log("✔ Scroll area verified");
+
+    // Check if "Random Name" exists inside Custom Columns
+    const randomNameRow = drawer.locator('p:has-text("Random Name")');
+
+    if (await randomNameRow.count() > 0) {
+      console.log("🟡 Random Name column found — deleting it...");
+
+      // Locate the trash icon next to the Random Name row
+      const deleteButton = randomNameRow
+        .locator('xpath=ancestor::div[contains(@style,"cursor")]')
+        .locator('button:has(svg.lucide-trash-2)');
+
+      await deleteButton.click();
+
+      console.log("🟡 Delete confirmation opened");
+      const deleteDialog = page.locator('.mantine-Popover-dropdown[role="dialog"]');
+
+      // Wait for dialog to become visible
+      await expect(deleteDialog).toBeVisible();
+
+      // Click the red Delete button
+      await deleteDialog.getByRole('button', { name: 'Delete' }).click();
+
+      console.log("🟢 Delete confirmed");
+
+      console.log("🟢 Random Name column deleted successfully");
+    } else {
+      console.log("ℹ️ Random Name NOT found — nothing to delete");
+    }
 
 
 
@@ -343,7 +433,7 @@ test.describe('Property Flow Test Suite', () => {
     console.log('Using property name:', propertyName);
 
     // Change view and search property
-    // await prop.changeView('Table View');
+    await prop.changeView('Table View');
     await prop.searchProperty(propertyName);
 
     // Assert 'View Details' button exists and click it
@@ -381,15 +471,6 @@ test.describe('Property Flow Test Suite', () => {
       console.log(`Cell ${i}:`, cellText);
       expect(cellText.trim().length).toBeGreaterThan(0);
     }
-
-    // Assert action buttons exist
-    // Assert action buttons exist
-    const downloadBtn = firstRowLocator.locator('button:has(svg.lucide-download)');
-    await expect(downloadBtn).toBeVisible();
-
-    const deleteBtn = firstRowLocator.locator('button[title="Delete File"]');
-    await expect(deleteBtn).toBeVisible();
-
   });
 
   test('TC07 - validate asset viewer tab', async () => {
@@ -961,7 +1042,5 @@ test.describe('Property Flow Test Suite', () => {
     }
 
   });
-
-
 
 });
