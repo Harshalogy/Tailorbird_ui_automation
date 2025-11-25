@@ -18,7 +18,7 @@ test.afterAll(async () => {
   if (context) await context.close();
 });
 
-test.describe('Organization Flow - Clean POM', () => {
+test.describe('Manage Organization Flow ', () => {
 
   test('TC01 - Invite new user to organization with Member role', async () => {
     const email = `member_${Date.now()}@yopmail.com`;
