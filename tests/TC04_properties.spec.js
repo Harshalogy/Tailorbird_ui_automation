@@ -303,7 +303,39 @@ test.describe('Property Flow Test Suite', () => {
       console.log("[ERROR] Add Tags & Types modal validation failed:", err);
       throw err;
     }
-    console.log("[INFO] TC06 completed successfully ✅");
+
+    // 1) Get the first row
+    const firstRow = page.locator('.ag-center-cols-container [role="row"]').first();
+
+    // 2) Get all visible gridcells inside the row
+    const cells = firstRow.locator('[role="gridcell"]');
+
+    const cellCount = await cells.count();
+    console.log(`Total cells in row: ${cellCount}`);
+
+    // 3) Loop through all cells and log their content
+    let extractedValues = {};
+
+    for (let i = 0; i < cellCount; i++) {
+      const cell = cells.nth(i);
+      const colId = await cell.getAttribute("col-id");
+
+      // extract text
+      const text = (await cell.innerText()).trim();
+
+      extractedValues[colId] = text;
+      console.log(`➡ ${colId}: ${text}`);
+    }
+
+    // 4) Assert ONLY the file name column (col-id = "name")
+    const fileName = extractedValues["name"];
+    console.log(`Extracted File Name = ${fileName}`);
+
+    await expect(fileName).toBe("property_data.csv");
+
+
+
+    console.log("[INFO] TC05 completed successfully ✅");
   });
 
   test('TC06 - Change View & Search Property', async () => {
@@ -828,7 +860,7 @@ test.describe('Property Flow Test Suite', () => {
     console.log("🔥 All new steps executed successfully.");
   });
 
-  test.only('TC11 - validate takeoffs panel and dropdowns', async () => {
+  test('TC11 - validate takeoffs panel and dropdowns', async () => {
 
     const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property)';
     console.log(`🔎 Using property name: ${propertyName}`);
@@ -929,5 +961,7 @@ test.describe('Property Flow Test Suite', () => {
     }
 
   });
+
+
 
 });
