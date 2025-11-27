@@ -432,6 +432,11 @@ class PropertiesHelper {
         await scrollContainer.evaluate((el, amt) => el.scrollBy({ left: amt }), amount);
     }
 
+    async scrollBackToStart() {
+    const scrollContainer = this.page.locator(propertyLocators.tableScrollContainer);
+    await scrollContainer.evaluate(el => el.scrollTo({ left: 0 }));
+}
+
     async getHeaderText(index) {
         const headerLocator = this.page.locator(propertyLocators.tableViewHeader);
         return headerLocator.nth(index).textContent();
