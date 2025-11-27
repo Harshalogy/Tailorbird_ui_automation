@@ -145,7 +145,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
   });
 
   test('TC07 - validate add data form', async () => {
-    await prop.goto(data.dashboardUrl);
+    await prop.goToProperties();
     const propertyName = getPropertyName();
     console.log('Using property name:', propertyName);
     await prop.changeView('Table View');
