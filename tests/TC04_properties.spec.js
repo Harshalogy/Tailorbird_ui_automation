@@ -7,7 +7,7 @@ import path from 'path';
 import { getPropertyName } from '../utils/propertyUtils';
 import testData from '../fixture/property.json';
 const ModalHandler = require('../pages/modalHandler');
-const loc = require('../locators/propertyLocator');
+const loc = require('../locators/locationLocator');
 
 
 const propertyTypes = [
@@ -34,6 +34,25 @@ test.beforeAll(async ({ browser }) => {
   prop = new PropertiesHelper(page);
   await prop.goto(data.dashboardUrl);
   await prop.goToProperties();
+  page.on('domcontentloaded', async () => {
+    await page.evaluate(() => {
+      const elements = document.querySelectorAll('main, .mantine-AppShell-navbar');
+      elements.forEach(el => {
+        el.style.zoom = '70%';
+        // For transform instead of zoom:
+        // el.style.transform = 'scale(0.7)';
+        // el.style.transformOrigin = 'top left';
+      });
+    });
+  });
+
+  // apply zoom immediately too
+  await page.evaluate(() => {
+    const elements = document.querySelectorAll('main, .mantine-AppShell-navbar');
+    elements.forEach(el => {
+      el.style.zoom = '70%';
+    });
+  });
 });
 
 test.afterAll(async () => {
@@ -154,7 +173,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await prop.deleteProperty(propertyName);
   });
 
-   test("TC09 - Validate Location Tab", async () => {
+  test("TC09 - Validate Location Tab", async () => {
 
     const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property)';
     console.log(`🔎 Using property name: ${propertyName}`);
@@ -453,6 +472,6 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await prop.addColumnTakeOff('exterior');
   });
 
- 
+
 
 });
