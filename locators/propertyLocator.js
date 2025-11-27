@@ -54,6 +54,6 @@ export const propertyLocators = {
     rowFromCell: "xpath=ancestor::div[@role='row']",
     rowDeleteIcon: rowIndex => `.ag-pinned-right-cols-container div[row-index="${rowIndex}"] .lucide-trash-2`,
     deleteButtonInPopover: '.mantine-Popover-dropdown button:has-text("Delete")',
-
-    
+    deleteConfirmBtn: ".mantine-Popover-dropdown button:has-text('Delete')",
+    deleteColumnIcon: ".mantine-Group-root:has-text('Random Name') .lucide-trash2"
 };

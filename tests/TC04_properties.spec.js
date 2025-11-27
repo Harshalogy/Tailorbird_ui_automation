@@ -63,6 +63,7 @@ test.afterAll(async () => {
 test.describe('PROPERTY FLOW TEST SUITE', () => {
 
   test('TC01 - Validate Property Export Functionality and New Property Creation', async () => {
+    await prop.exportButton();
     await prop.createProperty(name, address, city, state, zip, property_type);
 
     const propertyData = {
@@ -125,6 +126,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await prop.validateTabs();
     await prop.validateOverviewFields(vals);
 
+
     await prop.uploadPropertyDocument(path.resolve("./files/property_data.csv"));
     await prop.exportButton();
 
@@ -132,7 +134,10 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
   });
 
   test('TC06 - Validate Document Section Table', async () => {
+    await prop.goto(data.dashboardUrl);
     const propertyName = getPropertyName();
+    await prop.goToProperties();
+    await prop.changeView('Table View');
     await prop.openPropertyDetails(propertyName);
     await prop.validatePropertyDocumentsSection();
     await prop.validateDocumentTableHeaders();
@@ -140,6 +145,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
   });
 
   test('TC07 - validate add data form', async () => {
+    await prop.goto(data.dashboardUrl);
     const propertyName = getPropertyName();
     console.log('Using property name:', propertyName);
     await prop.changeView('Table View');
@@ -161,20 +167,21 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
       descInputLocator: descInput,
       typeButtonsLocator: typeButtons,
       submitButtonLocator: submitButton,
-      name: 'Random_column_' + Date.now(),
+      name: 'Random Name',
       description: 'Random_description_' + Date.now()
     });
   });
 
   test('TC08 - Validate Delete Property', async () => {
+    await prop.goto(data.dashboardUrl);
+    await prop.goToProperties();
     const propertyName = getPropertyName();
-    await prop.changeView(testData.viewName);
+    await prop.changeView('Table View');
     await prop.searchProperty(propertyName);
     await prop.deleteProperty(propertyName);
   });
 
   test("TC09 - Validate Location Tab", async () => {
-
     const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property)';
     console.log(`🔎 Using property name: ${propertyName}`);
 

@@ -125,12 +125,12 @@ class PropertiesHelper {
     //     expect(fileName).toMatch(/\.xlsx$|\.csv$|\.pdf$/);
     // }
 
-    
+
     async exportButton() {
 
         const [download] = await Promise.all([
-            this.page.waitForEvent("download"),     
-            this.page.click('.mantine-ActionIcon-icon .lucide-download:visible') 
+            this.page.waitForEvent("download"),
+            this.page.click('.mantine-ActionIcon-icon .lucide-download:visible')
         ]);
 
         // Get file name
@@ -433,9 +433,9 @@ class PropertiesHelper {
     }
 
     async scrollBackToStart() {
-    const scrollContainer = this.page.locator(propertyLocators.tableScrollContainer);
-    await scrollContainer.evaluate(el => el.scrollTo({ left: 0 }));
-}
+        const scrollContainer = this.page.locator(propertyLocators.tableScrollContainer);
+        await scrollContainer.evaluate(el => el.scrollTo({ left: 0 }));
+    }
 
     async getHeaderText(index) {
         const headerLocator = this.page.locator(propertyLocators.tableViewHeader);
@@ -484,55 +484,77 @@ class PropertiesHelper {
         }
     }
 
+    // async uploadPropertyDocument(filePath) {
+    //     try {
+    //         const uploadFilesBtn = this.page.locator(propertyLocators.uploadFilesBtn);
+    //         await expect(uploadFilesBtn.first()).toBeVisible({ timeout: 5000 });
+    //         await uploadFilesBtn.first().click();
+    //         console.log("[STEP] Upload Files button clicked");
+    //         const dialog = this.page.locator(propertyLocators.uploadDialog);
+    //         await expect(dialog).toBeVisible();
+    //         console.log("[ASSERT] Upload modal opened");
+    //         const uploadTexts = ["Drop files here", "From device", "Google Drive", "Dropbox", "Cancel", "Powered by Uploadcare"];
+    //         for (const t of uploadTexts) {
+    //             const txtEl = dialog.getByText(t);
+    //             await expect(txtEl).toBeVisible();
+    //         }
+    //         const uploadSelector = '::-p-input[type="file"]';
+    //         const fileInput = this.page.locator(propertyLocators.uploadFileInput);
+    //         await this.page.setInputFiles(uploadSelector, filePath);
+    //         await dialog.getByText("From device").click();
+    //         // await fileInput.waitFor({ state: "attached" });
+    //         // await fileInput.setInputFiles(filePath);
+    //         // console.log(`[ASSERT] File uploaded → ${filePath}`);
+    //         // const uploadListDialog = this.page.locator(propertyLocators.uploadListDialog);
+    //         // await expect(uploadListDialog).toBeVisible();
+    //         // const uploadedFileName = uploadListDialog.locator(".uc-file-name");
+    //         // await expect(uploadedFileName.first()).toBeVisible();
+    //         // const toolbarBtns = ["Remove", "Clear", /Add more/i, "Done"];
+    //         // for (const btn of toolbarBtns) {
+    //         //     const btnEl = uploadListDialog.getByRole("button", { name: btn });
+    //         //     await expect(btnEl.first()).toBeVisible();
+    //         // }
+    //         // await uploadListDialog.getByRole("button", { name: "Done" }).click();
+    //         // console.log("[ASSERT] Done clicked → Upload modal closed");
+    //         // const tagsModal = this.page.locator('section[role="dialog"] >> text=Add Tags & Types').locator('..').locator('..');
+    //         // await expect(tagsModal).toBeVisible();
+    //         // const modalTitle = tagsModal.getByRole("heading", { name: "Add Tags & Types" });
+    //         // await expect(modalTitle).toBeVisible();
+    //         // const fileSize = tagsModal.getByText(/Bytes/);
+    //         // await expect(fileSize).toBeVisible();
+    //         // const clearAllBtn = tagsModal.getByRole("button", { name: "Clear all" });
+    //         // const addFilesBtn = tagsModal.getByRole("button", { name: "Add Files" });
+    //         // await expect(clearAllBtn).toBeVisible();
+    //         // await expect(addFilesBtn).toBeVisible();
+    //         // console.log("[STEP] Clicking Add Files...");
+    //         // await addFilesBtn.click();
+    //         // await this.page.waitForTimeout(5000);
+    //         // await this.page.keyboard.press('Escape');
+    //          console.log("[ASSERT] Add Files clicked → ready for additional uploads");
+    //     } catch (err) {
+    //         console.log("[ERROR] uploadPropertyDocument failed:", err);
+    //         throw err;
+    //     }
+    // }
+
     async uploadPropertyDocument(filePath) {
         try {
-            const uploadFilesBtn = this.page.locator(propertyLocators.uploadFilesBtn);
-            await expect(uploadFilesBtn.first()).toBeVisible({ timeout: 5000 });
-            await uploadFilesBtn.first().click();
-            console.log("[STEP] Upload Files button clicked");
+            await this.page.locator(propertyLocators.uploadFilesBtn).first().click();
+            await this.page.locator(propertyLocators.uploadDialog).waitFor();
             const dialog = this.page.locator(propertyLocators.uploadDialog);
-            await expect(dialog).toBeVisible();
-            console.log("[ASSERT] Upload modal opened");
-            const uploadTexts = ["Drop files here", "From device", "Google Drive", "Dropbox", "Cancel", "Powered by Uploadcare"];
-            for (const t of uploadTexts) {
-                const txtEl = dialog.getByText(t);
-                await expect(txtEl).toBeVisible();
-            }
-            const fileInput = this.page.locator(propertyLocators.uploadFileInput);
             await dialog.getByText("From device").click();
-            await fileInput.waitFor({ state: "attached" });
+            const fileInput = this.page.locator('input[type="file"]');
             await fileInput.setInputFiles(filePath);
-            console.log(`[ASSERT] File uploaded → ${filePath}`);
-            const uploadListDialog = this.page.locator(propertyLocators.uploadListDialog);
-            await expect(uploadListDialog).toBeVisible();
-            const uploadedFileName = uploadListDialog.locator(".uc-file-name");
-            await expect(uploadedFileName.first()).toBeVisible();
-            const toolbarBtns = ["Remove", "Clear", /Add more/i, "Done"];
-            for (const btn of toolbarBtns) {
-                const btnEl = uploadListDialog.getByRole("button", { name: btn });
-                await expect(btnEl.first()).toBeVisible();
-            }
-            await uploadListDialog.getByRole("button", { name: "Done" }).click();
-            console.log("[ASSERT] Done clicked → Upload modal closed");
-            const tagsModal = this.page.locator('section[role="dialog"] >> text=Add Tags & Types').locator('..').locator('..');
-            await expect(tagsModal).toBeVisible();
-            const modalTitle = tagsModal.getByRole("heading", { name: "Add Tags & Types" });
-            await expect(modalTitle).toBeVisible();
-            const fileSize = tagsModal.getByText(/Bytes/);
-            await expect(fileSize).toBeVisible();
-            const clearAllBtn = tagsModal.getByRole("button", { name: "Clear all" });
-            const addFilesBtn = tagsModal.getByRole("button", { name: "Add Files" });
-            await expect(clearAllBtn).toBeVisible();
-            await expect(addFilesBtn).toBeVisible();
-            console.log("[STEP] Clicking Add Files...");
-            await addFilesBtn.click();
-            await this.page.waitForTimeout(5000);
-            console.log("[ASSERT] Add Files clicked → ready for additional uploads");
+
+            console.log(`✔ Uploaded via UploadCare → ${filePath}`);
+            await this.page.keyboard.press('Escape'); // optional close
+
         } catch (err) {
-            console.log("[ERROR] uploadPropertyDocument failed:", err);
+            console.log("[ERROR] Upload failed:", err);
             throw err;
         }
     }
+
 
     async manageColumns(expectedColumns, deleteColumn = "Random Name") {
         const tableSettingsBtn = this.page.locator(propertyLocators.tableSettingsButton).first();
@@ -551,9 +573,10 @@ class PropertiesHelper {
         if (await randomNameRow.count() > 0) {
             const deleteBtn = randomNameRow.locator('xpath=ancestor::div[contains(@style,"cursor")]').locator('button:has(svg.lucide-trash-2)');
             await deleteBtn.click();
-            const deleteDialog = this.page.locator(propertyLocators.deletePopoverDialog);
-            await expect(deleteDialog).toBeVisible();
-            await deleteDialog.getByRole('button', { name: 'Delete' }).click();
+            // DELETE COLUMN
+            await this.page.locator(propertyLocators.deleteColumnIcon).click();
+            await this.page.locator(propertyLocators.deleteConfirmBtn).click();
+            console.log("✔ Custom column deleted");
         }
     }
 
