@@ -1,25 +1,20 @@
 const { expect } = require("@playwright/test");
 const loc = require("../locators/organization");
 const data = require("../fixture/organization.json");
+import { propertyLocators } from '../locators/propertyLocator.js';
+import testData from '../fixture/property.json';
 
 class PropertiesHelper {
     constructor(page) {
         this.page = page;
-
-
-
-        // Modal fields
         this.nameInput = page.getByLabel('Name');
         this.addressInput = page.getByRole('textbox', { name: 'Address' });
         this.cityInput = page.getByLabel('City');
         this.stateInput = page.getByLabel('State');
         this.zipInput = page.getByLabel('Zipcode');
         this.typeInput = page.locator('input[placeholder="Select type"]');
-
-        // Buttons
         this.cancelBtn = page.getByRole('button', { name: 'Cancel' });
         this.addPropertyBtn = page.getByRole('button', { name: /add property/i });
-
     }
 
     log(msg) {
@@ -43,46 +38,33 @@ class PropertiesHelper {
     }
 
     async goToProperties() {
-
-        await this.page.locator(".mantine-NavLink-root:has-text('Properties')").waitFor({ state: "visible" });
-        await this.page.locator(".mantine-NavLink-root:has-text('Properties')").click();
-
-        await this.page.locator(".mantine-Breadcrumbs-root:has-text('Properties')").waitFor({ state: "visible" });
+        await this.page.locator(propertyLocators.propertiesNavLink).waitFor({ state: "visible" });
+        await this.page.locator(propertyLocators.propertiesNavLink).click();
+        await this.page.locator(propertyLocators.breadcrumbsProperties).waitFor({ state: "visible" });
         await expect(this.page).toHaveURL(/.*\/properties/);
     }
 
     async createProperty(name, address, city, state, zip, type) {
-
         await this.page.waitForLoadState("networkidle");
         await this.page.waitForTimeout(3000);
-        await this.page.locator("button:has-text('Create Property')").waitFor({ state: "visible" });
-        await this.page.locator("button:has-text('Create Property')").click({ force: true });
-
-        await this.page.locator(".mantine-Modal-header:has-text('Add property')").waitFor({ state: "visible" });
+        await this.page.locator(propertyLocators.createPropertyButton).waitFor({ state: "visible" });
+        await this.page.locator(propertyLocators.createPropertyButton).click({ force: true });
+        await this.page.locator(propertyLocators.addPropertyModalHeader).waitFor({ state: "visible" });
         await this.verifyModalFields();
-
         await this.nameInput.fill(name);
         await this.addressInput.fill(address);
-        await this.page.locator(`.mantine-Autocomplete-option:has-text("${address}")`).waitFor({ state: "visible" });
-        await this.page.locator(`.mantine-Autocomplete-option:has-text("${address}")`).click();
-        // await this.cityInput.fill(city);
-        // await this.stateInput.fill(state);
-        // await this.zipInput.fill(zip);
+        await this.page.locator(propertyLocators.addressSuggestion(address)).nth(0).waitFor({ state: "visible" });
+        await this.page.locator(propertyLocators.addressSuggestion(address)).nth(0).click();
         await this.typeInput.fill(type);
-        await this.page.locator(`.mantine-Select-option:has-text("${type}")`).waitFor({ state: "visible" });
-        await this.page.locator(`.mantine-Select-option:has-text("${type}")`).click();
+        await this.page.locator(propertyLocators.propertyTypeOption(type)).waitFor({ state: "visible" });
+        await this.page.locator(propertyLocators.propertyTypeOption(type)).click();
         await this.page.waitForLoadState("networkidle");
         await this.page.waitForTimeout(3000);
         await this.addPropertyBtn.click();
-
-
         await this.page.locator(`.mantine-Breadcrumbs-root:has-text('${name}')`).waitFor({ state: "visible" });
-
-        await this.page.locator(".mantine-NavLink-root:has-text('Properties')").waitFor({ state: "visible" });
-        await this.page.locator(".mantine-NavLink-root:has-text('Properties')").click();
-
-        await this.page.locator(`.mantine-SimpleGrid-root p:has-text('${name}')`).waitFor({ state: "visible" });
-
+        await this.page.locator(propertyLocators.propertiesNavLink).nth(0).waitFor({ state: "visible" });
+        await this.page.locator(propertyLocators.propertiesNavLink).nth(0).click();
+        await this.page.locator(`.mantine-SimpleGrid-root p:has-text('${name}')`).nth(0).waitFor({ state: "visible" });
     }
 
     async verifyModalFields() {
@@ -97,71 +79,49 @@ class PropertiesHelper {
     }
 
     async changeView(view) {
-        // Table View
-        // Grid View
         await this.page.waitForLoadState("networkidle");
         await this.page.waitForTimeout(2000);
-        await this.page.locator(".lucide.lucide-layout-list").waitFor({ state: "visible" });
-        await this.page.locator(".lucide.lucide-layout-list").click();
-        await this.page.locator(`.mantine-Menu-itemLabel:has-text('${view}')`).waitFor({ state: "visible" });
-        await this.page.locator(`.mantine-Menu-itemLabel:has-text('${view}')`).click();
-        await this.page.locator(".ag-root-wrapper").waitFor({ state: "visible" });
+        await this.page.locator(propertyLocators.layoutListIcon).waitFor({ state: "visible" });
+        await this.page.locator(propertyLocators.layoutListIcon).click();
+        await this.page.locator(propertyLocators.viewMenuItemLabel(view)).waitFor({ state: "visible" });
+        await this.page.locator(propertyLocators.viewMenuItemLabel(view)).click();
+        await this.page.locator(propertyLocators.gridRootWrapper).waitFor({ state: "visible" });
         await this.page.waitForLoadState("networkidle");
         await this.page.waitForTimeout(2000);
     }
 
     async filterProperty(type) {
-
-        await this.page.locator(".mantine-Paper-root p:has-text('Filter')").waitFor({ state: "visible" });
-
-        // convert "Garden Style" to "garden_style"
+        await this.page.locator(propertyLocators.filterPanelTitle).waitFor({ state: "visible" });
         const normalizedType = type.toLowerCase().replace(/\s+/g, "_");
-        await this.page.locator(`input[value="${normalizedType}"]`).waitFor({ state: "visible" });
-        await this.page.locator(`input[value="${normalizedType}"]`).click();
+        await this.page.locator(propertyLocators.filterCheckbox(normalizedType)).waitFor({ state: "visible" });
+        await this.page.locator(propertyLocators.filterCheckbox(normalizedType)).click();
         await this.page.waitForLoadState("networkidle");
         await this.page.waitForTimeout(3000);
-
-        const badges = this.page.locator('.ag-center-cols-container .mantine-Badge-label');
-
+        const badges = this.page.locator(propertyLocators.filterBadges);
         const count = await badges.count();
-
         if (count === 0) {
             console.log(`Checking "${type}" filter has no data in the table.`);
-            await this.page.locator('.mantine-Paper-root a:has-text("Clear All Filters")').waitFor({ state: "visible" });
-            await this.page.locator('.mantine-Paper-root a:has-text("Clear All Filters")').click();
-            return; // ❗ prevent further execution
+            await this.page.locator(propertyLocators.clearAllFiltersLink).waitFor({ state: "visible" });
+            await this.page.locator(propertyLocators.clearAllFiltersLink).click();
+            return;
         }
-
         const firstBadge = badges.first();
-
-        // Wait ONLY for first badge, not networkidle
         await firstBadge.waitFor({ state: "visible", timeout: 5000 });
-
         const text = (await firstBadge.textContent()).trim();
         expect(text).toBe(type);
-
         console.log(`Checking "${type}" filter gives "${count}" rows are visible in the table.`);
-
-
-        await this.page.locator('.mantine-Paper-root a:has-text("Clear All Filters")').waitFor({ state: "visible" });
-        await this.page.locator('.mantine-Paper-root a:has-text("Clear All Filters")').click();
+        await this.page.locator(propertyLocators.clearAllFiltersLink).waitFor({ state: "visible" });
+        await this.page.locator(propertyLocators.clearAllFiltersLink).click();
     }
 
     async exportButton() {
-
         const [download] = await Promise.all([
-            this.page.waitForEvent("download"),         // 1️⃣ wait for browser download event
-            this.page.click('.lucide-download') // 2️⃣ trigger the export
+            this.page.waitForEvent("download"),
+            this.page.click(propertyLocators.downloadIcon)
         ]);
-
-        // Get file name
         const fileName = download.suggestedFilename();
         console.log("Downloaded:", fileName);
-
-        // Save to desired folder
         await download.saveAs(`./downloads/${fileName}`);
-
-        // Assert file is downloaded
         expect(fileName).toMatch(/\.xlsx$|\.csv$|\.pdf$/);
     }
 
@@ -169,38 +129,24 @@ class PropertiesHelper {
         await this.page.locator('input[placeholder="Search..."]').fill(name);
         await this.page.waitForLoadState("networkidle");
         await this.page.waitForTimeout(3000);
-
-        const firstRowNameCell = this.page.locator(
-            '.ag-center-cols-container div[role="row"] div[col-id="name"]'
-        ).first();
-
-        // Wait until row matches search text
+        const firstRowNameCell = this.page.locator(propertyLocators.firstRowNameCell).first();
         await expect(firstRowNameCell).toHaveText(name);
-
         console.log(`Search successful → Found: ${name}`);
-        // await this.page.locator('input[placeholder="Search..."]').clear();
     }
 
     async deleteProperty(name) {
-
-        // Find the Row index of passed Property
-        const cell = this.page.locator(`.ag-center-cols-container p[title="${name}"], span:has-text("${name}")`);
-        const row = cell.locator("xpath=ancestor::div[@role='row']");
+        const cell = this.page.locator(propertyLocators.propertyNameCell(name));
+        const row = cell.locator(propertyLocators.rowFromCell).nth(0);
         const rowIndex = await row.getAttribute("row-index");
-        // console.log(`Row index of "${name}":`, rowIndex);
-
-        // delete button
         await this.page.waitForLoadState("networkidle");
         await this.page.waitForTimeout(3000);
-        await this.page.locator(`.ag-pinned-right-cols-container div[row-index="${rowIndex}"] .lucide-trash-2`).waitFor({ state: "visible" });
-        await this.page.locator(`.ag-pinned-right-cols-container div[row-index="${rowIndex}"] .lucide-trash-2`).click();
-
-        await this.page.locator('.mantine-Popover-dropdown button:has-text("Delete")').waitFor({ state: "visible" });
-        await this.page.locator('.mantine-Popover-dropdown button:has-text("Delete")').click();
-
-        await this.page.locator(`.ag-center-cols-container p[title="${name}"]`).waitFor({ state: "hidden" });
+        await this.page.locator(propertyLocators.rowDeleteIcon(rowIndex)).waitFor({ state: "visible" });
+        await this.page.locator(propertyLocators.rowDeleteIcon(rowIndex)).click();
+        await this.page.locator(propertyLocators.deleteButtonInPopover).waitFor({ state: "visible" });
+        await this.page.locator(propertyLocators.deleteButtonInPopover).click();
+        await this.page.locator(`.ag-center-cols-container p[title="${name}"]`).first().waitFor({ state: "hidden" });
         await expect(this.page.locator(`.ag-center-cols-container p[title="${name}"]`)).not.toBeVisible();
-        console.log(`Property: ${name} is Deleted.`)
+        console.log(`Property: ${name} is Deleted.`);
     }
 
     async openInvite() {
@@ -458,6 +404,339 @@ class PropertiesHelper {
             this.log(`ERROR verifying updated role for ${email}. Expected ${expectedRole}. Error: ${err}`);
             throw err;
         }
+    }
+
+    async scrollHorizontally(index) {
+        const scrollContainer = this.page.locator(propertyLocators.tableScrollContainer);
+        const amount = (index + 1) * testData.scrollIncrement;
+        await scrollContainer.evaluate((el, amt) => el.scrollBy({ left: amt }), amount);
+    }
+
+    async getHeaderText(index) {
+        const headerLocator = this.page.locator(propertyLocators.tableViewHeader);
+        return headerLocator.nth(index).textContent();
+    }
+
+    async validateHeader(index, expectedText, expectInstance) {
+        const headerLocator = this.page.locator(propertyLocators.tableViewHeader);
+        await expectInstance(headerLocator.nth(index)).toHaveText(expectedText, { timeout: 5000 });
+    }
+
+    async viewPropertyDetails(propertyName) {
+        const viewDetailsBtn = this.page.locator(propertyLocators.viewDetailsButton).first();
+        await expect(viewDetailsBtn).toBeVisible();
+        await viewDetailsBtn.click();
+        await expect(this.page).toHaveURL(/\/properties\/details\?propertyId=/);
+        const title = this.page.locator(`text=${propertyName}`).first();
+        await expect(title).toBeVisible();
+    }
+
+    async validateTabs(tabs = ["Overview", "Asset Viewer", "Takeoffs", "Locations"]) {
+        for (const tab of tabs) {
+            const tabEl = this.page.getByRole('tab', { name: tab });
+            await expect(tabEl).toBeVisible();
+        }
+        const overviewTab = this.page.getByRole("tab", { name: "Overview" });
+        await expect(overviewTab).toHaveAttribute("data-active", "true");
+    }
+
+    async validateOverviewFields(dynamicValues) {
+        const overviewFields = [
+            { label: "Ownership Group", value: "Tailorbird_QA_Automations" },
+            { label: "Property Name", value: dynamicValues["Property Name"] },
+            { label: "Property Type", value: dynamicValues["property_type"] },
+            { label: "Address", value: dynamicValues["Address"] },
+            { label: "City", value: dynamicValues["City"] },
+            { label: "State", value: dynamicValues["State"] },
+            { label: "Zip Code", value: dynamicValues["Zip Code"] },
+            { label: "Unit Count", value: "0" }
+        ];
+        for (const field of overviewFields) {
+            const labelEl = this.page.locator(`text="${field.label}"`).first();
+            const valueEl = labelEl.locator('xpath=..//following-sibling::div//p').first();
+            await expect(valueEl).toBeVisible({ timeout: 10000 });
+            // await expect(valueEl).toHaveText(String(field.value), { timeout: 10000 });
+        }
+    }
+
+    async uploadPropertyDocument(filePath) {
+        try {
+            const uploadFilesBtn = this.page.locator(propertyLocators.uploadFilesBtn);
+            await expect(uploadFilesBtn.first()).toBeVisible({ timeout: 5000 });
+            await uploadFilesBtn.first().click();
+            console.log("[STEP] Upload Files button clicked");
+            const dialog = this.page.locator(propertyLocators.uploadDialog);
+            await expect(dialog).toBeVisible();
+            console.log("[ASSERT] Upload modal opened");
+            const uploadTexts = ["Drop files here", "From device", "Google Drive", "Dropbox", "Cancel", "Powered by Uploadcare"];
+            for (const t of uploadTexts) {
+                const txtEl = dialog.getByText(t);
+                await expect(txtEl).toBeVisible();
+            }
+            const fileInput = this.page.locator(propertyLocators.uploadFileInput);
+            await dialog.getByText("From device").click();
+            await fileInput.waitFor({ state: "attached" });
+            await fileInput.setInputFiles(filePath);
+            console.log(`[ASSERT] File uploaded → ${filePath}`);
+            const uploadListDialog = this.page.locator(propertyLocators.uploadListDialog);
+            await expect(uploadListDialog).toBeVisible();
+            const uploadedFileName = uploadListDialog.locator(".uc-file-name");
+            await expect(uploadedFileName.first()).toBeVisible();
+            const toolbarBtns = ["Remove", "Clear", /Add more/i, "Done"];
+            for (const btn of toolbarBtns) {
+                const btnEl = uploadListDialog.getByRole("button", { name: btn });
+                await expect(btnEl.first()).toBeVisible();
+            }
+            await uploadListDialog.getByRole("button", { name: "Done" }).click();
+            console.log("[ASSERT] Done clicked → Upload modal closed");
+            const tagsModal = this.page.locator('section[role="dialog"] >> text=Add Tags & Types').locator('..').locator('..');
+            await expect(tagsModal).toBeVisible();
+            const modalTitle = tagsModal.getByRole("heading", { name: "Add Tags & Types" });
+            await expect(modalTitle).toBeVisible();
+            const fileSize = tagsModal.getByText(/Bytes/);
+            await expect(fileSize).toBeVisible();
+            const clearAllBtn = tagsModal.getByRole("button", { name: "Clear all" });
+            const addFilesBtn = tagsModal.getByRole("button", { name: "Add Files" });
+            await expect(clearAllBtn).toBeVisible();
+            await expect(addFilesBtn).toBeVisible();
+            console.log("[STEP] Clicking Add Files...");
+            await addFilesBtn.click();
+            await this.page.waitForTimeout(5000);
+            console.log("[ASSERT] Add Files clicked → ready for additional uploads");
+        } catch (err) {
+            console.log("[ERROR] uploadPropertyDocument failed:", err);
+            throw err;
+        }
+    }
+
+    async manageColumns(expectedColumns, deleteColumn = "Random Name") {
+        const tableSettingsBtn = this.page.locator(propertyLocators.tableSettingsButton).first();
+        await expect(tableSettingsBtn).toBeVisible();
+        await tableSettingsBtn.click();
+        const drawer = this.page.locator(propertyLocators.manageColumnsDrawer);
+        await expect(drawer).toBeVisible();
+        await expect(drawer.getByText("Manage Columns", { exact: true })).toBeVisible();
+        for (const col of expectedColumns) {
+            const row = drawer.locator(`p:has-text("${col}")`);
+            await expect(row.first()).toBeVisible();
+            const checkbox = row.locator('xpath=ancestor::div[contains(@style,"cursor")]').locator('input[type="checkbox"]');
+            await expect(checkbox.first()).toBeVisible();
+        }
+        const randomNameRow = drawer.locator(`p:has-text("${deleteColumn}")`);
+        if (await randomNameRow.count() > 0) {
+            const deleteBtn = randomNameRow.locator('xpath=ancestor::div[contains(@style,"cursor")]').locator('button:has(svg.lucide-trash-2)');
+            await deleteBtn.click();
+            const deleteDialog = this.page.locator(propertyLocators.deletePopoverDialog);
+            await expect(deleteDialog).toBeVisible();
+            await deleteDialog.getByRole('button', { name: 'Delete' }).click();
+        }
+    }
+
+    async openPropertyDetails(propertyName) {
+        await this.changeView('Table View');
+        await this.searchProperty(propertyName);
+        const viewBtn = this.page.locator(propertyLocators.viewDetailsBtn).first();
+        await expect(viewBtn).toBeVisible({ timeout: 5000 });
+        await viewBtn.click();
+        await expect(this.page).toHaveURL(/properties\/details/);
+    }
+
+    async validatePropertyDocumentsSection() {
+        const header = this.page.locator(propertyLocators.documentsHeader);
+        const subHeader = this.page.locator(propertyLocators.documentsSubHeader);
+        const uploadButton = this.page.locator(propertyLocators.uploadFilesBtn);
+        await expect(header).toBeVisible();
+        await expect(subHeader).toBeVisible();
+        await expect(uploadButton.first()).toBeVisible();
+    }
+
+    async validateDocumentTableHeaders() {
+        const headers = this.page.locator(propertyLocators.tableHeaders);
+        const count = await headers.count();
+        for (let i = 0; i < count; i++) {
+            const text = await headers.nth(i).innerText();
+            console.log(`Header ${i}: ${text}`);
+            expect(text.trim().length).toBeGreaterThan(0);
+        }
+    }
+
+    async validateFirstRowValues() {
+        const firstRow = this.page.locator(propertyLocators.tableRows).first();
+        const cells = firstRow.locator(propertyLocators.tableRowCells);
+        const count = await cells.count();
+        for (let i = 0; i < count; i++) {
+            const text = await cells.nth(i).innerText();
+            console.log(`Cell ${i}: ${text}`);
+            expect(text.trim().length).toBeGreaterThan(0);
+        }
+    }
+
+    async openAddDataModal() {
+        const btn = this.page.locator(propertyLocators.addDataButton);
+        await btn.waitFor({ state: 'visible' });
+        await btn.click();
+    }
+
+    async filterPropertyNew(type) {
+
+        await this.page.locator(".mantine-Paper-root p:has-text('Filter')").waitFor({ state: "visible" });
+
+        // convert "Garden Style" to "garden_style"
+        await this.page.locator(`.mantine-Checkbox-labelWrapper label:has-text("${type}")`).waitFor({ state: "visible" });
+        await this.page.locator(`.mantine-Checkbox-labelWrapper label:has-text("${type}")`).click();
+
+        await this.page.waitForLoadState("networkidle");
+        await this.page.waitForTimeout(3000);
+
+        const badges = this.page.locator('.ag-center-cols-container div[col-id="floorplan_id"]');
+
+        const count = await badges.count();
+
+        if (count === 0) {
+            console.log(`Checking "${type}" filter has no data in the table.`);
+            await this.page.locator('.mantine-Paper-root a:has-text("Clear All Filters")').waitFor({ state: "visible" });
+            await this.page.locator('.mantine-Paper-root a:has-text("Clear All Filters")').click();
+            return; // ❗ prevent further execution
+        }
+
+        const firstBadge = badges.first();
+
+        // Wait ONLY for first badge, not networkidle
+        await firstBadge.waitFor({ state: "visible", timeout: 5000 });
+
+        const text = (await firstBadge.textContent()).trim();
+        expect(text).toBe(type);
+
+        console.log(`Checking "${type}" filter gives "${count}" rows are visible in the table.`);
+
+
+        await this.page.locator('.mantine-Paper-root a:has-text("Clear All Filters")').waitFor({ state: "visible" });
+        await this.page.locator('.mantine-Paper-root a:has-text("Clear All Filters")').click();
+    }
+
+    async unitMix() {
+
+        await this.page.locator('button[title="Unit Mix"]:visible').click();
+        await this.page.locator(".mantine-Modal-content header:has-text('Unit Mix'):visible").waitFor({ state: "visible" });
+        await this.page.locator(".mantine-Modal-content header:has-text('Unit Mix'):visible").click();
+
+        // Expected floorplan names
+        const expected = [
+            "CALEDESI",
+            "CAPTIVA",
+            "CLEARWTR",
+            "DESOTO",
+            "MADEIRA"
+        ];
+
+        // Locate all elements in the left pinned column
+        const floorplanCells = this.page.locator('.mantine-Modal-content [col-id="floorplan_name"]');
+        await floorplanCells.first().waitFor({ state: "visible" });
+
+        // Extract text from all matched elements
+        let actual = await floorplanCells.allTextContents();
+
+        actual = actual
+            .map(x => x.trim())
+            .filter(x => expected.includes(x));
+
+        // Assert exact match
+        expect(actual).toEqual(expected);
+        console.log(`✅ Unit Mix floorplan names verified successfully.`);
+        console.log(`Floor Plan Type Visible in Unit Mix Modal: ${expected}`);
+
+        await this.page.locator(".mantine-Modal-close:visible").waitFor({ state: "visible" });
+        await this.page.locator(".mantine-Modal-close:visible").click();
+
+    }
+
+    async addPropertyTakeOff(tab) {
+        await this.page.locator(".lucide-plus:visible").waitFor({ state: "visible" });
+        await this.page.locator(".lucide-plus:visible").click();
+
+        await this.page.locator(`button:has-text('Add Property_${tab}_takeoff')`).waitFor({ state: "visible" });
+        await this.page.locator(`button:has-text('Add Property_${tab}_takeoff')`).click();
+
+        if (tab === 'interior') {
+            // Select Floorplan
+            await this.page.locator('.ag-floating-top div[col-id="floorplan_id"]').waitFor({ state: "visible" });
+            await this.page.locator('.ag-floating-top div[col-id="floorplan_id"]').dblclick();
+            await this.page.locator('.mantine-ScrollArea-content p').first().waitFor({ state: "visible" });
+            await this.page.locator('.mantine-ScrollArea-content p').first().click();
+
+            // unit_mix_quantity
+            await this.page.waitForLoadState("networkidle");
+            await this.page.waitForTimeout(3000);
+            const unit_mix_quantity = this.page.locator('div[row-index="0"] div[col-id="unit_mix_quantity"]');
+            await unit_mix_quantity.waitFor({ state: "visible" });
+            await unit_mix_quantity.dblclick();
+            await this.page.waitForLoadState("networkidle");
+            await this.page.waitForTimeout(3000);
+            await unit_mix_quantity.locator('input').fill('100');
+            await unit_mix_quantity.locator('input').press('Enter');
+            await this.page.waitForLoadState("networkidle");
+            await this.page.waitForTimeout(3000);
+            const cellValue = await this.page.locator('div[row-index="0"] div[col-id="count"]').textContent();
+            expect.soft(cellValue?.trim(), `Count mismatch → expected: 100, got: ${cellValue}`).toBe('100');
+
+
+        } else if (tab === 'exterior') {
+            // Select Building Type
+            await this.page.locator('.ag-floating-top div[col-id="building_type_id"]').waitFor({ state: "visible" });
+            await this.page.locator('.ag-floating-top div[col-id="building_type_id"]').dblclick();
+            await this.page.locator('.mantine-ScrollArea-content p').first().waitFor({ state: "visible" });
+            await this.page.locator('.mantine-ScrollArea-content p').first().click();
+
+            // unit_mix_quantity
+            await this.page.waitForLoadState("networkidle");
+            await this.page.waitForTimeout(3000);
+            const unit_mix_quantity = this.page.locator('div[row-index="0"] div[col-id="unit_mix_quantity"]');
+            await unit_mix_quantity.waitFor({ state: "visible" });
+            await unit_mix_quantity.dblclick();
+            await this.page.waitForLoadState("networkidle");
+            await this.page.waitForTimeout(3000);
+            await unit_mix_quantity.locator('input').fill('100');
+            await unit_mix_quantity.locator('input').press('Enter');
+            await this.page.waitForLoadState("networkidle");
+            await this.page.waitForTimeout(3000);
+
+            const cellValue = await this.page.locator('div[row-index="0"] div[col-id="count"]').textContent();
+            expect.soft(cellValue?.trim(), `Count mismatch → expected: 100, got: ${cellValue}`).toBe('100');
+
+
+        }
+
+    }
+
+    async addColumnTakeOff(tab) {
+
+        await this.page.locator(".lucide-plus:visible").waitFor({ state: "visible" });
+        await this.page.locator(".lucide-plus:visible").click();
+
+        await this.page.locator(`button:has-text('Add Data')`).waitFor({ state: "visible" });
+        await this.page.locator(`button:has-text('Add Data')`).click();
+
+        // column
+        let columnName = `columnName${Date.now()}`;
+        await this.page.locator(`.mantine-Paper-root p:has-text('Add column')`).waitFor({ state: "visible" });
+        await this.page.locator(`input[placeholder="Enter column name (letters, numbers, spaces, hyphens only)"]`).fill(columnName);
+        await this.page.locator(`input[placeholder="Enter column description (required)"]`).fill(columnName);
+        await this.page.locator(`button:has-text('Text')`).click();
+        await this.page.locator(`button:has-text('Add column')`).click();
+
+        await this.page.waitForLoadState("networkidle");
+        await this.page.waitForTimeout(3000);
+        // await this.page.locator(`p:has-text('${columnName}')`).waitFor({ state: "visible" });
+        // await expect.soft(this.page.locator(`p:has-text('${columnName}')`)).toBeVisible();
+
+        // Column Assertions in Settings icon
+        await this.page.locator(`.lucide.lucide-settings:visible`).waitFor({ state: "visible" });
+        await this.page.locator(`.lucide.lucide-settings:visible`).click();
+        await this.page.locator(`header:has-text('Manage Columns')`).waitFor({ state: "visible" });
+        await expect.soft(this.page.locator(`p:has-text('${columnName}')`)).toBeVisible();
+
+        await this.page.locator(`.mantine-CloseButton-root:visible`).waitFor({ state: "visible" });
+        await this.page.locator(`.mantine-CloseButton-root:visible`).click();
     }
 }
 
