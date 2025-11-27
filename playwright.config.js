@@ -20,7 +20,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
 
   /* Retry on CI only */
-  retries: process.env.CI ? 1 : 0,
+  retries: process.env.CI ? 0 : 0,
 
   /* Opt out of parallel tests on CI */
   workers:1,
@@ -33,7 +33,7 @@ export default defineConfig({
 
   /* Shared settings for all projects */
   use: {
-    headless: false,
+    headless: true,
     viewport: { width: 1280, height: 720 },
     actionTimeout: 55 * 1000,
 

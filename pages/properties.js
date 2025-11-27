@@ -114,22 +114,42 @@ class PropertiesHelper {
         await this.page.locator(propertyLocators.clearAllFiltersLink).click();
     }
 
+    // async exportButton() {
+    //     const [download] = await Promise.all([
+    //         this.page.waitForEvent("download"),
+    //         this.page.click(propertyLocators.downloadIcon)
+    //     ]);
+    //     const fileName = download.suggestedFilename();
+    //     console.log("Downloaded:", fileName);
+    //     await download.saveAs(`./downloads/${fileName}`);
+    //     expect(fileName).toMatch(/\.xlsx$|\.csv$|\.pdf$/);
+    // }
+
+    
     async exportButton() {
+
         const [download] = await Promise.all([
-            this.page.waitForEvent("download"),
-            this.page.click(propertyLocators.downloadIcon)
+            this.page.waitForEvent("download"),     
+            this.page.click('.mantine-ActionIcon-icon .lucide-download:visible') 
         ]);
+
+        // Get file name
         const fileName = download.suggestedFilename();
         console.log("Downloaded:", fileName);
+
+        // Save to desired folder
         await download.saveAs(`./downloads/${fileName}`);
+
+        // Assert file is downloaded
         expect(fileName).toMatch(/\.xlsx$|\.csv$|\.pdf$/);
     }
+
 
     async searchProperty(name) {
         await this.page.locator('input[placeholder="Search..."]').fill(name);
         await this.page.waitForLoadState("networkidle");
         await this.page.waitForTimeout(3000);
-        const firstRowNameCell = this.page.locator(propertyLocators.firstRowNameCell).first();
+        const firstRowNameCell = this.page.locator(propertyLocators.firstRowNameCell);
         await expect(firstRowNameCell).toHaveText(name);
         console.log(`Search successful → Found: ${name}`);
     }

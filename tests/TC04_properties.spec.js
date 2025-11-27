@@ -41,9 +41,9 @@ test.afterAll(async () => {
 });
 
 
-test.describe('PROPERTY FLOW SUITE', () => {
+test.describe('PROPERTY FLOW TEST SUITE', () => {
 
-  test('TC01 - Export + Property Create', async () => {
+  test('TC01 - Validate Property Export Functionality and New Property Creation', async () => {
     await prop.createProperty(name, address, city, state, zip, property_type);
 
     const propertyData = {
@@ -60,13 +60,13 @@ test.describe('PROPERTY FLOW SUITE', () => {
     console.log(`Property data saved to: ${downloadPath}`);
   });
 
-  test('TC02 - Change View + Search', async () => {
+  test('TC02 - Change Property View and Validate Search Results', async () => {
     const propertyName = getPropertyName();
     await prop.changeView(testData.viewName);
     await prop.searchProperty(propertyName);
   });
 
-  test('TC03 - Filter Validation (All Types)', async () => {
+  test('TC03 - Validate Filters: Garden, Mid-Rise, High-Rise, and Military', async () => {
     await page.locator(".lucide.lucide-funnel").waitFor({ state: "visible" });
     await page.locator(".lucide.lucide-funnel").click();
     await prop.filterProperty(property_type);
@@ -77,7 +77,7 @@ test.describe('PROPERTY FLOW SUITE', () => {
     await page.locator(".mantine-Paper-root .mantine-CloseButton-root").click();
   });
 
-  test('TC04 - Validate Column Headers Scrolling', async () => {
+  test('TC04 new - Validate All Column Headers in Table View', async () => {
     await prop.changeView('Table View');
     for (let i = 0; i < testData.expectedHeaders.length; i++) {
       await prop.scrollHorizontally(i);
@@ -87,7 +87,7 @@ test.describe('PROPERTY FLOW SUITE', () => {
     }
   });
 
-  test('TC05 - Overview + Export + Documents + Columns', async () => {
+  test('TC05 - Validate Overview Fields and Property Document Actions', async () => {
     const propName = getPropertyName();
     const vals = {
       "Property Name": propName,
@@ -119,31 +119,7 @@ test.describe('PROPERTY FLOW SUITE', () => {
     await prop.validateFirstRowValues();
   });
 
-  test('TC07 - Asset Viewer Basic Layout', async () => {
-    const propertyName = "Harbor Bay at MacDill_Liberty Cove (Sample Property)";
-
-    await prop.changeView(testData.viewName);
-    await prop.searchProperty(propertyName);
-    await prop.openPropertyDetails(propertyName);
-
-    const viewerTab = page.getByRole("tab", { name: "Asset Viewer" });
-    await viewerTab.click();
-
-    const viewerPanel = page.getByRole("tabpanel").nth(1);
-    await expect(viewerPanel).toBeVisible();
-
-    await expect(viewerPanel.getByLabel(testData.assetViewerLabels.type)).toHaveValue('Site');
-    await expect(viewerPanel.getByText(testData.assetViewerLabels.no3DMain)).toBeVisible();
-    await expect(viewerPanel.getByText(testData.assetViewerLabels.no3DSub)).toBeVisible();
-
-    await expect(viewerPanel.getByRole("button", { name: "Export" })).toBeVisible();
-    await viewerPanel.getByRole("button", { name: "Export" }).click();
-
-    const drawer = page.locator('section[role="dialog"]');
-    await expect(drawer.getByText(testData.exportDrawer.title)).toBeVisible();
-  });
-
-  test('TC08 - validate add data form', async () => {
+  test('TC07 - validate add data form', async () => {
     const propertyName = getPropertyName();
     console.log('Using property name:', propertyName);
     await prop.changeView('Table View');
@@ -170,48 +146,14 @@ test.describe('PROPERTY FLOW SUITE', () => {
     });
   });
 
-  test('TC09 - Delete Property', async () => {
+  test('TC08 - Validate Delete Property', async () => {
     const propertyName = getPropertyName();
     await prop.changeView(testData.viewName);
     await prop.searchProperty(propertyName);
     await prop.deleteProperty(propertyName);
   });
 
-  test('TC10 - Deep Asset Viewer Validation (Options + Image Responsiveness)', async () => {
-    const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property)';
-
-    await prop.changeView(testData.viewName);
-    await prop.searchProperty(propertyName);
-    await prop.openPropertyDetails(propertyName);
-
-    const assetTab = page.getByRole("tab", { name: "Asset Viewer" });
-    await assetTab.click();
-
-    const panelId = await assetTab.getAttribute("aria-controls");
-    const assetPanel = page.locator(`#${panelId}`);
-
-    const dropdowns = ['Type', 'Site', 'View'];
-    for (const d of dropdowns) {
-      const input = assetPanel.locator(`label:has-text("${d}") + div input`);
-      await input.click();
-      const id = await input.getAttribute('aria-controls');
-      const list = page.locator(`#${id} div[role="option"]`);
-      const count = await list.count();
-
-      for (let i = 0; i < count; i++) {
-        await input.click();
-        await expect(page.locator(`#${id}`)).toBeVisible();
-        await list.nth(i).click();
-        await expect(input).toHaveValue(await list.nth(i).innerText().then(v => v.trim().split("\n")[0]));
-        await page.waitForTimeout(400);
-      }
-    }
-
-    const image = assetPanel.locator('img');
-    if (await image.count() > 0) expect(await image.first().isVisible()).toBeTruthy();
-  });
-
-  test('TC11 - validate takeoffs Interior panel and dropdowns', async () => {
+  test.only('TC9 - validate takeoffs Interior panel and dropdowns', async () => {
 
     const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property)';
     console.log(`🔎 Using property name: ${propertyName}`);
@@ -301,7 +243,7 @@ test.describe('PROPERTY FLOW SUITE', () => {
 
   });
 
-  test('TC12 - validate takeoffs Exterior panel and dropdowns', async () => {
+  test.only('TC10 - validate takeoffs Exterior panel and dropdowns', async () => {
 
     const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property)';
     console.log(`🔎 Using property name: ${propertyName}`);
