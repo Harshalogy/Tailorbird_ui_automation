@@ -153,7 +153,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await prop.deleteProperty(propertyName);
   });
 
-  test.only('TC9 - validate takeoffs Interior panel and dropdowns', async () => {
+  test('TC9 - validate takeoffs Interior panel and dropdowns', async () => {
 
     const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property)';
     console.log(`🔎 Using property name: ${propertyName}`);
@@ -243,7 +243,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
 
   });
 
-  test.only('TC10 - validate takeoffs Exterior panel and dropdowns', async () => {
+  test('TC10 - validate takeoffs Exterior panel and dropdowns', async () => {
 
     const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property)';
     console.log(`🔎 Using property name: ${propertyName}`);
@@ -333,6 +333,123 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
 
     // Add Column Exterior TakeOff
     await prop.addColumnTakeOff('exterior');
+  });
+
+  test("TC12 - Validate Location Tab", async () => {
+
+    const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property)';
+    console.log(`🔎 Using property name: ${propertyName}`);
+
+    // Change view & search property
+    await prop.changeView('Table View');
+    console.log("✔ Changed to Table View");
+
+    await prop.searchProperty(propertyName);
+    console.log("✔ Property searched successfully");
+
+    // VIEW DETAILS
+    await expect(page.locator(loc.viewDetailsBtn).first()).toBeVisible();
+    await page.locator(loc.viewDetailsBtn).first().click();
+    console.log("✔ View Details clicked");
+
+    // LOCATION TAB
+    const locationsTab = page.locator(loc.locationsTab);
+    await expect(locationsTab).toBeVisible();
+    await locationsTab.click();
+    await expect(locationsTab).toHaveAttribute('data-active', 'true');
+    console.log("✔ Locations tab opened");
+
+    // ADD SITE
+    const addButton = page.locator(loc.addButton);
+    await addButton.waitFor({ state: 'visible' });
+    await addButton.click();
+    console.log("✔ Add dropdown opened");
+
+    // Select Add Site
+    const addSite = page.locator(loc.addSite);
+    await expect(addSite).toBeVisible();
+    await addSite.click();
+
+    const newRow = page.getByRole('row', { name: /—/ }).first();
+    await expect(newRow).toBeVisible();
+    console.log("✔ New empty row visible");
+
+    // Add Name
+    await page.locator(loc.nameCell).dblclick();
+    await page.locator(loc.nameInput).fill("My Test Name");
+    await page.keyboard.press("Enter");
+    console.log("✔ New site name added");
+
+    await page.waitForTimeout(1500);
+
+    // DELETE ROW
+    const deleteRow = page.locator(loc.deleteRowBtn).first();
+    await deleteRow.click({ delay: 200 });
+    await page.locator(loc.deleteConfirmBtn).click();
+    console.log("✔ Row deleted");
+
+    // ADD DATA
+    await addButton.click();
+    const addData = page.locator(loc.addDataOption);
+    await expect(addData).toBeVisible();
+    await addData.click();
+
+    // MODAL – Add Column
+    const modal = page.locator(loc.modal_AddColumn);
+    await expect(modal).toBeVisible();
+    console.log("✔ Add Column modal open");
+
+    await page.locator(loc.columnNameInput).fill("Test Column");
+    await page.locator(loc.descriptionInput).fill("This is a test description.");
+    await page.locator(loc.addColumnBtn).waitFor({ state: "visible" });
+    await expect(page.locator(loc.addColumnBtn)).toBeEnabled();
+
+    await page.locator(loc.addColumnBtn).click();
+    console.log("✔ New column added");
+
+    // SETTINGS PANEL
+    await page.locator(loc.tableSettingBtn).click();
+
+    const drawer = page.locator(loc.settingsDrawer);
+    await expect(drawer).toBeVisible();
+    await expect(drawer.locator(loc.drawerTitle)).toBeVisible();
+    await expect(drawer.locator(loc.drawerClose)).toBeVisible();
+    await expect(drawer.locator(loc.defaultColumnText)).toBeVisible();
+    await expect(drawer.locator(loc.customColumnsText)).toBeVisible();
+    console.log("✔ Settings drawer validated");
+
+    // DELETE COLUMN
+    await page.locator(loc.deleteColumnIcon).click();
+    await page.locator(loc.deleteConfirmBtn).click();
+    console.log("✔ Custom column deleted");
+
+    // LOCATION DROPDOWN FUNCTION
+    async function selectLocation(type) {
+      await page.click(loc.locationDropdown);
+      await page.click(loc.locationDropdownOption(type));
+      console.log(`✔ Location switched to: ${type}`);
+    }
+
+    // UNIT VALIDATION
+    await selectLocation("unit");
+    await expect(page.locator(loc.unitHeader)).toBeVisible();
+
+    const unitRowCount = await page.locator(loc.visibleRows).count();
+    expect(unitRowCount).toBeGreaterThan(1);
+    console.log(`✔ Unit rows verified (${unitRowCount})`);
+
+    // BUILDING VALIDATION
+    await selectLocation("building");
+
+    const headers = ['Name', 'Building', 'Site', 'Actions'];
+    for (const header of headers) {
+      await expect(page.getByRole('columnheader', { name: header })).toBeVisible();
+    }
+    console.log("✔ Building header validation complete");
+
+    const buildingRowCount = await page.locator('div[role="row"]').count();
+    expect(buildingRowCount).toBeGreaterThan(1);
+    console.log(`✔ Building rows verified (${buildingRowCount})`);
   });
 
 });
