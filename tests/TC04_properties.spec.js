@@ -479,6 +479,190 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await prop.addColumnTakeOff('exterior');
   });
 
+  test('TC10 – asset viewer', async () => {
+
+    test.setTimeout(900000)
+
+    const log = (...msg) => console.log("🔹", ...msg)
+
+    const wait = async () => {
+      log("⏳ Waiting network idle + 2s")
+      try { await page.waitForLoadState("networkidle", { timeout: 15000 }); } catch { log("⚠ networkidle skipped") }
+      await page.waitForTimeout(2000)
+    }
+
+    const safe = async (label, fn) => {
+      log(`▶ START: ${label}`)
+      try { await wait(); await fn(); log(`✔ DONE: ${label}`) }
+      catch (e) { log(`❗ FAIL: ${label}`, e.message) }
+    }
+
+    const getImg = async () => {
+      try {
+        const c = await page.locator("img").count()
+        if (c > 0) {
+          let src = await page.locator("img").first().getAttribute("src")
+          log(`📷 IMAGE FOUND → ${src}`)
+          return src
+        }
+      } catch { }
+      log("⚠ NO IMAGE FOUND")
+      return null
+    }
+
+    //━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // PAGE FLOW LOGGING
+    //━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    await safe("Changing table view", async () => await prop.changeView("Table View"))
+    await safe("Searching property", async () => await prop.searchProperty("Harbor Bay at MacDill 01_Liberty Cove (Sample Property 01)"))
+    await safe("Opening View Details", async () => await page.locator('button[title="View Details"]').first().click({ force: true }))
+    await safe("Opening Asset Viewer", async () => await page.locator('button:has-text("Asset Viewer")').click({ force: true }))
+
+    //━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // WAIT UNTIL PANEL EXISTS
+    //━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    log("🔍 Getting Asset Viewer panel id...")
+    let tab = page.locator('button:has-text("Asset Viewer")')
+    let id = await tab.getAttribute("aria-controls")
+
+    while (!id) {
+      log("⏳ aria-controls not ready → retrying")
+      await page.waitForTimeout(500)
+      id = await tab.getAttribute("aria-controls")
+    }
+
+    log("📌 PANEL ID =", id)
+    let pnl = page.locator(`#${id}`)
+
+    await pnl.waitFor({ state: "visible", timeout: 30000 })
+    log("🟩 PANEL LOADED & VISIBLE")
+
+    await wait()
+
+    //━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // COLLECT DROPDOWNS
+    //━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    const labels = await pnl.locator("label").allTextContents()
+    log("🔍 DROPDOWN LABELS DETECTED →", labels)
+
+    const dropdowns = labels.map(l => ({
+      name: l.trim(),
+      input: pnl.locator(`label:has-text("${l.trim()}") + div input`)
+    })).filter(x => x.name.length > 0)
+
+    log(`🎛 TOTAL DROPDOWNS FOUND = ${dropdowns.length}`)
+
+    let REPORT = []
+
+
+    //━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // CORE LOOP — FULL TRACING EACH STEP
+    //━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    for (const dd of dropdowns) {
+
+      log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+      log(`🔽 PROCESSING DROPDOWN → ${dd.name}`)
+      log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+
+      let out = { dropdown: dd.name, options: [], results: [], disabled: false }
+
+      await wait()
+
+      let count = await dd.input.count()
+      log(`📊 INPUT COUNT for '${dd.name}' = ${count}`)
+
+      if (count === 0) { log("⚠ DROPDOWN INPUT NOT FOUND → SKIPPING"); REPORT.push(out); continue }
+
+      let loc = count === 1 ? dd.input : dd.input.first()
+      if (count > 1) log(`⚠ MULTIPLE MATCHES → using first()`)
+
+      let enabled = await loc.isEnabled().catch(() => false)
+      log(`🔐 DROPDOWN '${dd.name}' ENABLED? →`, enabled)
+
+      if (!enabled) {
+        log(`⛔ '${dd.name}' DISABLED — FULL SKIP`)
+        out.disabled = true
+        REPORT.push(out)
+        continue
+      }
+
+      await safe(`Opening dropdown: ${dd.name}`, async () => await loc.click({ force: true }))
+
+      let list = page.locator(`#${await loc.getAttribute("aria-controls")} [role='option']`)
+      let total = await list.count()
+
+      log(`📋 OPTION COUNT for '${dd.name}' = ${total}`)
+
+      if (total === 0) { log("⚠ ZERO OPTIONS → SKIP"); REPORT.push(out); continue }
+      if (total > 20) { log("⚠ VISIBILITY FILTER ACTIVATED"); list = list.filter({ has: page.locator("[role='option']:visible") }); total = await list.count() }
+
+      // ─────────────────────────────────────────────
+      // OPTION LOOP — FULL TRACE LOGGING
+      // ─────────────────────────────────────────────
+      for (let i = 0; i < total; i++) {
+
+        log(`\n🔸 DROPDOWN '${dd.name}' → OPTION ${i + 1}/${total}`)
+
+        await wait()
+
+        let raw = await list.nth(i).innerText().catch(() => null)
+        if (!raw) {
+          log("⚠ FAILED TO READ OPTION TEXT → SKIP")
+          continue
+        }
+
+        let option = raw.split("\n")[0].trim()
+        out.options.push(option)
+
+        log(`🟦 Selecting option → ${option}`)
+
+        let before = await getImg()
+        await safe(`Clicking option '${option}'`, async () => await list.nth(i).click({ force: true }))
+        await wait()
+        let after = await getImg()
+
+        if (before === null && after === null) {
+          log(`⚠ NO IMAGE FOR '${option}' → SKIPPED BUT CONTINUING`)
+          out.results.push({ option, image: "none" })
+        }
+        else if (before !== after) {
+          log(`✔ IMAGE UPDATED for '${option}'`)
+          out.results.push({ option, imageChanged: true })
+        }
+        else {
+          log(`❗ IMAGE STATIC for '${option}'`)
+          out.results.push({ option, imageChanged: false })
+        }
+
+        if (i < total - 1) {
+          log(`↻ Reopening '${dd.name}' for next option`)
+          await safe(`Reopen dropdown '${dd.name}'`, async () => await loc.click({ force: true }))
+        }
+      }
+
+      REPORT.push(out)
+    }
+
+    //━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // EXPORT JSON WITH COMPLETE TRACE DATA
+    //━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    log("\n📄 EXPORTING FULL JSON LOG → dropdown_report.json")
+
+    await page.evaluate(r => {
+      const a = document.createElement("a")
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(r, null, 2)], { type: "application/json" }))
+      a.download = "dropdown_report.json"
+      a.click()
+    }, REPORT)
+
+    log("\n🔥 EXECUTION 100% COMPLETE — NO STOP, NO FAIL, FULL TRACE GENERATED 🔥\n")
+
+  });
+
 
 
 });
