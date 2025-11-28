@@ -59,7 +59,6 @@ test.afterAll(async () => {
   if (context) await context.close();
 });
 
-
 test.describe('PROPERTY FLOW TEST SUITE', () => {
 
   test('TC01 - Validate Property Export Functionality and New Property Creation', async () => {
@@ -297,8 +296,10 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     console.log(`✔ Building rows verified (${buildingRowCount})`);
   });
 
-  test.skip('TC10 - validate takeoffs Interior panel and dropdowns', async () => {
+  test('TC10 - validate takeoffs Interior panel and dropdowns', async () => {
 
+    await prop.goto(data.dashboardUrl);
+    await prop.goToProperties();
     const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property)';
     console.log(`🔎 Using property name: ${propertyName}`);
 
@@ -387,7 +388,10 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
 
   });
 
-  test.skip('TC11 - validate takeoffs Exterior panel and dropdowns', async () => {
+  test('TC11 - validate takeoffs Exterior panel and dropdowns', async () => {
+
+    await prop.goto(data.dashboardUrl);
+    await prop.goToProperties();
 
     const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property)';
     console.log(`🔎 Using property name: ${propertyName}`);
@@ -479,8 +483,9 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await prop.addColumnTakeOff('exterior');
   });
 
-  test('TC10 – asset viewer', async () => {
-
+  test('TC12 – asset viewer', async () => {
+    await prop.goto(data.dashboardUrl);
+    await prop.goToProperties();
     test.setTimeout(900000)
 
     const log = (...msg) => console.log("🔹", ...msg)
@@ -662,7 +667,5 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     log("\n🔥 EXECUTION 100% COMPLETE — NO STOP, NO FAIL, FULL TRACE GENERATED 🔥\n")
 
   });
-
-
 
 });

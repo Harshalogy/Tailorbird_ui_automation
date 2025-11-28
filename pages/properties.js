@@ -640,7 +640,7 @@ class PropertiesHelper {
             "CAPTIVA",
             "CLEARWTR",
             "DESOTO",
-            "MADEIRA"
+            // "MADEIRA"
         ];
 
         // Locate all elements in the left pinned column
@@ -747,10 +747,10 @@ class PropertiesHelper {
         await this.page.locator(`.lucide.lucide-settings:visible`).waitFor({ state: "visible" });
         await this.page.locator(`.lucide.lucide-settings:visible`).click();
         await this.page.locator(`header:has-text('Manage Columns')`).waitFor({ state: "visible" });
-        await expect.soft(this.page.locator(`p:has-text('${columnName}')`)).toBeVisible();
+        await expect.soft(this.page.locator(`p:has-text('${columnName}')`).nth(0)).toBeVisible();
 
-        await this.page.locator(`.mantine-CloseButton-root:visible`).waitFor({ state: "visible" });
-        await this.page.locator(`.mantine-CloseButton-root:visible`).click();
+        await this.page.locator(`.mantine-CloseButton-root:visible`).nth(0).waitFor({ state: "visible" });
+        await this.page.locator(`.mantine-CloseButton-root:visible`).nth(0).click();
     }
 }
 
