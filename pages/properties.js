@@ -44,28 +44,95 @@ class PropertiesHelper {
         await expect(this.page).toHaveURL(/.*\/properties/);
     }
 
+    // async createProperty(name, address, city, state, zip, type) {
+    //     await this.page.waitForLoadState("networkidle");
+    //     await this.page.waitForTimeout(3000);
+    //     await this.page.locator(propertyLocators.createPropertyButton).waitFor({ state: "visible" });
+    //     await this.page.locator(propertyLocators.createPropertyButton).click({ force: true });
+    //     await this.page.locator(propertyLocators.addPropertyModalHeader).waitFor({ state: "visible" });
+    //     await this.verifyModalFields();
+    //     await this.nameInput.fill(name);
+    //     await this.addressInput.fill(address);
+    //     await this.page.locator(propertyLocators.addressSuggestion(address)).nth(0).waitFor({ state: "visible" });
+    //     await this.page.locator(propertyLocators.addressSuggestion(address)).nth(0).click();
+    //     await this.typeInput.fill(type);
+    //     await this.page.locator(propertyLocators.propertyTypeOption(type)).waitFor({ state: "visible" });
+    //     await this.page.locator(propertyLocators.propertyTypeOption(type)).click();
+    //     await this.page.waitForLoadState("networkidle");
+    //     await this.page.waitForTimeout(3000);
+    //     await this.addPropertyBtn.click();
+    //     await this.page.locator(`.mantine-Breadcrumbs-root:has-text('${name}')`).waitFor({ state: "visible" });
+    //     await this.page.locator(propertyLocators.propertiesNavLink).nth(0).waitFor({ state: "visible" });
+    //     await this.page.locator(propertyLocators.propertiesNavLink).nth(0).click();
+    //     await this.page.locator(`.mantine-SimpleGrid-root p:has-text('${name}')`).nth(0).waitFor({ state: "visible" });
+    // }
+
     async createProperty(name, address, city, state, zip, type) {
-        await this.page.waitForLoadState("networkidle");
-        await this.page.waitForTimeout(3000);
-        await this.page.locator(propertyLocators.createPropertyButton).waitFor({ state: "visible" });
-        await this.page.locator(propertyLocators.createPropertyButton).click({ force: true });
-        await this.page.locator(propertyLocators.addPropertyModalHeader).waitFor({ state: "visible" });
-        await this.verifyModalFields();
-        await this.nameInput.fill(name);
-        await this.addressInput.fill(address);
-        await this.page.locator(propertyLocators.addressSuggestion(address)).nth(0).waitFor({ state: "visible" });
-        await this.page.locator(propertyLocators.addressSuggestion(address)).nth(0).click();
-        await this.typeInput.fill(type);
-        await this.page.locator(propertyLocators.propertyTypeOption(type)).waitFor({ state: "visible" });
-        await this.page.locator(propertyLocators.propertyTypeOption(type)).click();
-        await this.page.waitForLoadState("networkidle");
-        await this.page.waitForTimeout(3000);
-        await this.addPropertyBtn.click();
-        await this.page.locator(`.mantine-Breadcrumbs-root:has-text('${name}')`).waitFor({ state: "visible" });
-        await this.page.locator(propertyLocators.propertiesNavLink).nth(0).waitFor({ state: "visible" });
-        await this.page.locator(propertyLocators.propertiesNavLink).nth(0).click();
-        await this.page.locator(`.mantine-SimpleGrid-root p:has-text('${name}')`).nth(0).waitFor({ state: "visible" });
+        console.log("=== 🏠 START: Create Property Flow ===");
+
+        try {
+            console.log("⏳ Waiting for page to stabilize...");
+            await this.page.waitForLoadState("networkidle");
+            await this.page.waitForTimeout(3000);
+
+            console.log("🔎 Waiting for *Create Property* button...");
+            await this.page.locator(propertyLocators.createPropertyButton).waitFor({ state: "visible" });
+
+            console.log("🖱 Clicking *Create Property* button...");
+            await this.page.locator(propertyLocators.createPropertyButton).click({ force: true });
+
+            console.log("📌 Waiting for Add Property modal to appear...");
+            await this.page.locator(propertyLocators.addPropertyModalHeader).waitFor({ state: "visible" });
+
+            console.log("📝 Verifying modal field presence...");
+            await this.verifyModalFields();
+
+            console.log(`✍ Entering Name: ${name}`);
+            await this.nameInput.fill(name);
+
+            console.log(`✍ Entering Address: ${address}`);
+            await this.addressInput.fill(address);
+
+            console.log(`🔍 Selecting address suggestion for: ${address}`);
+            await this.page.locator(propertyLocators.addressSuggestion(address)).nth(0).waitFor({ state: "visible" });
+            await this.page.locator(propertyLocators.addressSuggestion(address)).nth(0).click();
+
+            console.log(`🏷 Entering Property Type: ${type}`);
+            await this.typeInput.fill(type);
+
+            console.log("📍 Selecting property type from dropdown...");
+            await this.page.locator(propertyLocators.propertyTypeOption(type)).waitFor({ state: "visible" });
+            await this.page.locator(propertyLocators.propertyTypeOption(type)).click();
+
+            console.log("⏳ Waiting for request to settle...");
+            await this.page.waitForLoadState("networkidle");
+            await this.page.waitForTimeout(3000);
+
+            console.log("💾 Clicking *Add Property*...");
+            await this.addPropertyBtn.click();
+
+            console.log(`🔄 Wait for property creation: verifying breadcrumb '${name}'`);
+            await this.page.locator(`.mantine-Breadcrumbs-root:has-text('${name}')`).waitFor({ state: "visible" });
+
+            console.log("⬅ Navigating back to property list...");
+            await this.page.locator(propertyLocators.propertiesNavLink).nth(0).waitFor({ state: "visible" });
+            await this.page.locator(propertyLocators.propertiesNavLink).nth(0).click();
+
+            console.log(`🔍 Validating property '${name}' appears in list...`);
+            await this.page.locator(`.mantine-SimpleGrid-root p:has-text('${name}')`).nth(0).waitFor({ state: "visible" });
+
+            console.log(`🎉 SUCCESS: Property '${name}' created and verified successfully!`);
+
+        } catch (error) {
+            console.log("❌ ERROR during Create Property Flow ❌");
+            console.log("Message:", error.message);
+            console.log("Stack:", error.stack);
+            throw error; // rethrow so test fails properly
+        }
+
+        console.log("=== 🏁 END: Create Property Flow ===");
     }
+
 
     async verifyModalFields() {
         await expect(this.nameInput).toBeVisible();
@@ -115,35 +182,68 @@ class PropertiesHelper {
     }
 
     // async exportButton() {
+
     //     const [download] = await Promise.all([
     //         this.page.waitForEvent("download"),
-    //         this.page.click(propertyLocators.downloadIcon)
+    //         this.page.click('.mantine-ActionIcon-icon .lucide-download:visible')
     //     ]);
+
+    //     // Get file name
     //     const fileName = download.suggestedFilename();
     //     console.log("Downloaded:", fileName);
+
+    //     // Save to desired folder
     //     await download.saveAs(`./downloads/${fileName}`);
+
+    //     // Assert file is downloaded
     //     expect(fileName).toMatch(/\.xlsx$|\.csv$|\.pdf$/);
     // }
 
-
     async exportButton() {
+        console.log("\n========== 📁 EXPORT FILE FLOW STARTED ==========\n");
 
-        const [download] = await Promise.all([
-            this.page.waitForEvent("download"),
-            this.page.click('.mantine-ActionIcon-icon .lucide-download:visible')
-        ]);
+        try {
+            console.log("⏳ Step 1: Preparing to wait for file download and click export button...");
+            console.log("👉 Waiting for event: 'download'");
 
-        // Get file name
-        const fileName = download.suggestedFilename();
-        console.log("Downloaded:", fileName);
+            const [download] = await Promise.all([
+                this.page.waitForEvent("download"), // waiting for file to start downloading
+                this.page.click('.mantine-ActionIcon-icon .lucide-download:visible') // actual export click
+            ]);
 
-        // Save to desired folder
-        await download.saveAs(`./downloads/${fileName}`);
+            console.log("✔ Step 1 Completed → Download event detected");
 
-        // Assert file is downloaded
-        expect(fileName).toMatch(/\.xlsx$|\.csv$|\.pdf$/);
+            // Get file name
+            console.log("\n⏳ Step 2: Extracting downloaded file name...");
+            const fileName = download.suggestedFilename();
+            console.log(`📄 Suggested download filename received: "${fileName}"`);
+
+            // Save to downloads folder
+            console.log("\n⏳ Step 3: Saving file to system...");
+            const savePath = `./downloads/${fileName}`;
+            console.log(`💾 Destination Path → ${savePath}`);
+
+            await download.saveAs(savePath);
+            console.log("✔ File saved successfully →", savePath);
+
+            // Validate download file type
+            console.log("\n⏳ Step 4: Validating file format extension...");
+            console.log("Allowed Extensions → .xlsx | .csv | .pdf");
+
+            expect(fileName).toMatch(/\.xlsx$|\.csv$|\.pdf$/);
+            console.log(`✔ File format validation passed: "${fileName}" is a valid exported file.`);
+
+            console.log("\n🎉 EXPORT FLOW SUCCESSFULLY COMPLETED\n");
+
+        } catch (error) {
+            console.log("\n❌ EXPORT FILE FLOW FAILED ❌");
+            console.log("Error Message:", error.message);
+            console.log("Stack Trace:", error.stack);
+            throw error;
+        }
+
+        console.log("\n========== 📁 EXPORT FILE FLOW ENDED ==========\n");
     }
-
 
     async searchProperty(name) {
         await this.page.locator('input[placeholder="Search..."]').fill(name);
@@ -454,15 +554,18 @@ class PropertiesHelper {
         await expect(this.page).toHaveURL(/\/properties\/details\?propertyId=/);
         const title = this.page.locator(`text=${propertyName}`).first();
         await expect(title).toBeVisible();
+        console.log(`[ASSERT] Navigated to Property Details → ${propertyName} and title is -> ${title}`);
     }
 
     async validateTabs(tabs = ["Overview", "Asset Viewer", "Takeoffs", "Locations"]) {
         for (const tab of tabs) {
             const tabEl = this.page.getByRole('tab', { name: tab });
             await expect(tabEl).toBeVisible();
+            console.log(`[ASSERT] Tab visible → ${tab}`);
         }
         const overviewTab = this.page.getByRole("tab", { name: "Overview" });
         await expect(overviewTab).toHaveAttribute("data-active", "true");
+        console.log("[ASSERT] Overview tab is active by default");
     }
 
     async validateOverviewFields(dynamicValues) {
@@ -480,6 +583,7 @@ class PropertiesHelper {
             const labelEl = this.page.locator(`text="${field.label}"`).first();
             const valueEl = labelEl.locator('xpath=..//following-sibling::div//p').first();
             await expect(valueEl).toBeVisible({ timeout: 10000 });
+            console.log(`[ASSERT] ${field.label} → Expected: ${field.value}`);
             // await expect(valueEl).toHaveText(String(field.value), { timeout: 10000 });
         }
     }
@@ -520,6 +624,7 @@ class PropertiesHelper {
         await expect(addFilesBtn).toBeVisible();
         console.log("[STEP] Clicking Add Files...");
         await addFilesBtn.click();
+        console.log("file uploaded successfully");
     }
 
     async manageColumns(expectedColumns, deleteColumn = "Random Name") {
@@ -619,14 +724,48 @@ class PropertiesHelper {
         await expect(this.page).toHaveURL(/properties\/details/);
     }
 
+    // async validatePropertyDocumentsSection() {
+    //     const header = this.page.locator(propertyLocators.documentsHeader);
+    //     const subHeader = this.page.locator(propertyLocators.documentsSubHeader);
+    //     const uploadButton = this.page.locator(propertyLocators.uploadFilesBtn);
+    //     await expect(header).toBeVisible();
+    //     await expect(subHeader).toBeVisible();
+    //     await expect(uploadButton.first()).toBeVisible();
+    // }
+
     async validatePropertyDocumentsSection() {
-        const header = this.page.locator(propertyLocators.documentsHeader);
-        const subHeader = this.page.locator(propertyLocators.documentsSubHeader);
-        const uploadButton = this.page.locator(propertyLocators.uploadFilesBtn);
-        await expect(header).toBeVisible();
-        await expect(subHeader).toBeVisible();
-        await expect(uploadButton.first()).toBeVisible();
+
+        console.log("\n========== 📂 VALIDATING PROPERTY DOCUMENTS SECTION ==========\n");
+
+        try {
+
+            console.log("⏳ Step 1: Locating Documents Header...");
+            const header = this.page.locator(propertyLocators.documentsHeader);
+            await expect(header).toBeVisible();
+            console.log("✔ Documents Header is visible on page.");
+
+            console.log("\n⏳ Step 2: Locating Documents Sub-header...");
+            const subHeader = this.page.locator(propertyLocators.documentsSubHeader);
+            await expect(subHeader).toBeVisible();
+            console.log("✔ Documents Sub-header is visible.");
+
+            console.log("\n⏳ Step 3: Locating Upload Files button...");
+            const uploadButton = this.page.locator(propertyLocators.uploadFilesBtn);
+            await expect(uploadButton.first()).toBeVisible();
+            console.log("✔ Upload Files button is visible and ready.");
+
+            console.log("\n🎉 VALIDATION SUCCESS — Property Documents Section Loaded Correctly\n");
+
+        } catch (error) {
+            console.log("\n❌ ERROR IN validatePropertyDocumentsSection()");
+            console.log("Message →", error.message);
+            console.log("Stack Trace →", error.stack);
+            throw error; // keep failure visible in test
+        }
+
+        console.log("========== 📂 VALIDATION COMPLETED ==========\n");
     }
+
 
     async validateDocumentTableHeaders() {
         const headers = this.page.locator(propertyLocators.tableHeaders);
@@ -638,16 +777,56 @@ class PropertiesHelper {
         }
     }
 
+    // async validateFirstRowValues() {
+    //     const firstRow = this.page.locator(propertyLocators.tableRows).first();
+    //     const cells = firstRow.locator(propertyLocators.tableRowCells);
+    //     const count = await cells.count();
+    //     for (let i = 0; i < count; i++) {
+    //         const text = await cells.nth(i).innerText();
+    //         console.log(`Cell ${i}: ${text}`);
+    //         expect(text.trim().length).toBeGreaterThan(0);
+    //     }
+    // }
+
     async validateFirstRowValues() {
-        const firstRow = this.page.locator(propertyLocators.tableRows).first();
-        const cells = firstRow.locator(propertyLocators.tableRowCells);
-        const count = await cells.count();
-        for (let i = 0; i < count; i++) {
-            const text = await cells.nth(i).innerText();
-            console.log(`Cell ${i}: ${text}`);
-            expect(text.trim().length).toBeGreaterThan(0);
+
+        console.log("\n========== 📄 VALIDATE FIRST TABLE ROW VALUES START ==========\n");
+
+        try {
+            console.log("⏳ Step 1: Locating first table row...");
+            const firstRow = this.page.locator(propertyLocators.tableRows).first();
+
+            console.log("\n⏳ Step 2: Extracting cell elements inside first row...");
+            const cells = firstRow.locator(propertyLocators.tableRowCells);
+
+            const count = await cells.count();
+            console.log(`🔍 Total cells detected inside first row → ${count}`);
+
+            console.log("\n📊 Step 3: Iterating through each cell & logging value\n");
+
+            for (let i = 0; i < count; i++) {
+                console.log(`➡ Reading Cell ${i + 1}/${count}...`);
+                const text = await cells.nth(i).innerText();
+                console.log(`📌 Cell ${i} Value → "${text.trim()}"`);
+
+                console.log("🔍 Validating cell is not empty...");
+                expect(text.trim().length).toBeGreaterThan(0);
+                console.log(`✔ Cell ${i} validation passed.`);
+                console.log("---------------------------------------------");
+            }
+
+            console.log("\n🎉 FIRST ROW VALIDATION SUCCESSFUL — All cells contain data\n");
+
+        } catch (error) {
+            console.log("\n❌ ERROR in validateFirstRowValues()");
+            console.log("Message →", error.message);
+            console.log("Stack Trace →", error.stack);
+            throw error; // do not eat test failure
         }
+
+        console.log("\n========== 📄 VALIDATION END ==========\n");
     }
+
 
     async openAddDataModal() {
         const btn = this.page.locator(propertyLocators.addDataButton);
@@ -655,42 +834,103 @@ class PropertiesHelper {
         await btn.click();
     }
 
+    // async filterPropertyNew(type) {
+
+    //     await this.page.locator(".mantine-Paper-root p:has-text('Filter')").waitFor({ state: "visible" });
+
+    //     // convert "Garden Style" to "garden_style"
+    //     await this.page.locator(`.mantine-Checkbox-labelWrapper label:has-text("${type}")`).waitFor({ state: "visible" });
+    //     await this.page.locator(`.mantine-Checkbox-labelWrapper label:has-text("${type}")`).click();
+
+    //     await this.page.waitForLoadState("networkidle");
+    //     await this.page.waitForTimeout(3000);
+
+    //     const badges = this.page.locator('.ag-center-cols-container div[col-id="floorplan_id"]');
+
+    //     const count = await badges.count();
+
+    //     if (count === 0) {
+    //         console.log(`Checking "${type}" filter has no data in the table.`);
+    //         await this.page.locator('.mantine-Paper-root a:has-text("Clear All Filters")').waitFor({ state: "visible" });
+    //         await this.page.locator('.mantine-Paper-root a:has-text("Clear All Filters")').click();
+    //         return; // ❗ prevent further execution
+    //     }
+
+    //     const firstBadge = badges.first();
+
+    //     // Wait ONLY for first badge, not networkidle
+    //     await firstBadge.waitFor({ state: "visible", timeout: 5000 });
+
+    //     const text = (await firstBadge.textContent()).trim();
+    //     expect(text).toBe(type);
+
+    //     console.log(`Checking "${type}" filter gives "${count}" rows are visible in the table.`);
+
+
+    //     await this.page.locator('.mantine-Paper-root a:has-text("Clear All Filters")').waitFor({ state: "visible" });
+    //     await this.page.locator('.mantine-Paper-root a:has-text("Clear All Filters")').click();
+    // }
+
     async filterPropertyNew(type) {
 
-        await this.page.locator(".mantine-Paper-root p:has-text('Filter')").waitFor({ state: "visible" });
+        console.log("\n========== 🔎 FILTER PROPERTY START ==========\n");
+        console.log(`🎯 Filter selected → "${type}"\n`);
 
-        // convert "Garden Style" to "garden_style"
-        await this.page.locator(`.mantine-Checkbox-labelWrapper label:has-text("${type}")`).waitFor({ state: "visible" });
-        await this.page.locator(`.mantine-Checkbox-labelWrapper label:has-text("${type}")`).click();
+        try {
+            console.log("⏳ Step 1: Opening Filter section...");
+            await this.page.locator(".mantine-Paper-root p:has-text('Filter')").waitFor({ state: "visible" });
+            console.log("✔ Filter UI loaded\n");
 
-        await this.page.waitForLoadState("networkidle");
-        await this.page.waitForTimeout(3000);
+            console.log(`⏳ Step 2: Selecting checkbox option "${type}"...`);
+            await this.page.locator(`.mantine-Checkbox-labelWrapper label:has-text("${type}")`).waitFor({ state: "visible" });
+            await this.page.locator(`.mantine-Checkbox-labelWrapper label:has-text("${type}")`).click();
+            console.log(`✔ "${type}" checkbox clicked\n`);
 
-        const badges = this.page.locator('.ag-center-cols-container div[col-id="floorplan_id"]');
+            console.log("⏳ Step 3: Waiting for data refresh...");
+            await this.page.waitForLoadState("networkidle");
+            await this.page.waitForTimeout(3000);
+            console.log("✔ Data loaded successfully\n");
 
-        const count = await badges.count();
+            console.log("⏳ Step 4: Checking badge results in table...");
+            const badges = this.page.locator('.ag-center-cols-container div[col-id="floorplan_id"]');
+            const count = await badges.count();
+            console.log(`📊 Total rows returned after filter = ${count}\n`);
 
-        if (count === 0) {
-            console.log(`Checking "${type}" filter has no data in the table.`);
+            // 🔥 If no data found for filter
+            if (count === 0) {
+                console.log(`⚠ No records found for type "${type}".`);
+                console.log("⏳ Clicking Clear All Filters...");
+                await this.page.locator('.mantine-Paper-root a:has-text("Clear All Filters")').waitFor({ state: "visible" });
+                await this.page.locator('.mantine-Paper-root a:has-text("Clear All Filters")').click();
+                console.log("✔ Filters cleared\n");
+                console.log("========== ❗ FILTER COMPLETED – No Records ==========\n");
+                return;
+            }
+
+            console.log("⏳ Step 5: Reading first badge value...");
+            const firstBadge = badges.first();
+            await firstBadge.waitFor({ state: "visible", timeout: 5000 });
+
+            const text = (await firstBadge.textContent()).trim();
+            console.log(`📍 First row value -> "${text}"`);
+            expect(text).toBe(type);
+            console.log("✔ Badge text matches filter ✔\n");
+
+            console.log("⏳ Step 6: Clearing applied filters...");
             await this.page.locator('.mantine-Paper-root a:has-text("Clear All Filters")').waitFor({ state: "visible" });
             await this.page.locator('.mantine-Paper-root a:has-text("Clear All Filters")').click();
-            return; // ❗ prevent further execution
+            console.log("✔ Filters cleared successfully\n");
+
+        } catch (err) {
+            console.log(`❌ ERROR in filterPropertyNew("${type}")`);
+            console.log("Message →", err.message);
+            console.log("Stack →", err.stack);
+            throw err;
         }
 
-        const firstBadge = badges.first();
-
-        // Wait ONLY for first badge, not networkidle
-        await firstBadge.waitFor({ state: "visible", timeout: 5000 });
-
-        const text = (await firstBadge.textContent()).trim();
-        expect(text).toBe(type);
-
-        console.log(`Checking "${type}" filter gives "${count}" rows are visible in the table.`);
-
-
-        await this.page.locator('.mantine-Paper-root a:has-text("Clear All Filters")').waitFor({ state: "visible" });
-        await this.page.locator('.mantine-Paper-root a:has-text("Clear All Filters")').click();
+        console.log("========== 🎉 FILTER COMPLETE SUCCESS ==========\n");
     }
+
 
     async unitMix() {
 
@@ -728,94 +968,281 @@ class PropertiesHelper {
 
     }
 
+    // async addPropertyTakeOff(tab) {
+    //     await this.page.locator(".lucide-plus:visible").waitFor({ state: "visible" });
+    //     await this.page.locator(".lucide-plus:visible").click();
+
+    //     await this.page.locator(`button:has-text('Add Property_${tab}_takeoff')`).waitFor({ state: "visible" });
+    //     await this.page.locator(`button:has-text('Add Property_${tab}_takeoff')`).click();
+
+    //     if (tab === 'interior') {
+    //         // Select Floorplan
+    //         await this.page.locator('.ag-floating-top div[col-id="floorplan_id"]').waitFor({ state: "visible" });
+    //         await this.page.locator('.ag-floating-top div[col-id="floorplan_id"]').dblclick();
+    //         await this.page.locator('.mantine-ScrollArea-content p').first().waitFor({ state: "visible" });
+    //         await this.page.locator('.mantine-ScrollArea-content p').first().click();
+
+    //         // unit_mix_quantity
+    //         await this.page.waitForLoadState("networkidle");
+    //         await this.page.waitForTimeout(3000);
+    //         const unit_mix_quantity = this.page.locator('div[row-index="0"] div[col-id="unit_mix_quantity"]');
+    //         await unit_mix_quantity.waitFor({ state: "visible" });
+    //         await unit_mix_quantity.dblclick();
+    //         await this.page.waitForLoadState("networkidle");
+    //         await this.page.waitForTimeout(3000);
+    //         await unit_mix_quantity.locator('input').fill('100');
+    //         await unit_mix_quantity.locator('input').press('Enter');
+    //         await this.page.waitForLoadState("networkidle");
+    //         await this.page.waitForTimeout(3000);
+    //         const cellValue = await this.page.locator('div[row-index="0"] div[col-id="count"]').textContent();
+    //         expect.soft(cellValue?.trim(), `Count mismatch → expected: 100, got: ${cellValue}`).toBe('100');
+
+
+    //     } else if (tab === 'exterior') {
+    //         // Select Building Type
+    //         await this.page.locator('.ag-floating-top div[col-id="building_type_id"]').waitFor({ state: "visible" });
+    //         await this.page.locator('.ag-floating-top div[col-id="building_type_id"]').dblclick();
+    //         await this.page.locator('.mantine-ScrollArea-content p').first().waitFor({ state: "visible" });
+    //         await this.page.locator('.mantine-ScrollArea-content p').first().click();
+
+    //         // unit_mix_quantity
+    //         await this.page.waitForLoadState("networkidle");
+    //         await this.page.waitForTimeout(3000);
+    //         const unit_mix_quantity = this.page.locator('div[row-index="0"] div[col-id="unit_mix_quantity"]');
+    //         await unit_mix_quantity.waitFor({ state: "visible" });
+    //         await unit_mix_quantity.dblclick();
+    //         await this.page.waitForLoadState("networkidle");
+    //         await this.page.waitForTimeout(3000);
+    //         await unit_mix_quantity.locator('input').fill('100');
+    //         await unit_mix_quantity.locator('input').press('Enter');
+    //         await this.page.waitForLoadState("networkidle");
+    //         await this.page.waitForTimeout(3000);
+
+    //         const cellValue = await this.page.locator('div[row-index="0"] div[col-id="count"]').textContent();
+    //         expect.soft(cellValue?.trim(), `Count mismatch → expected: 100, got: ${cellValue}`).toBe('100');
+
+
+    //     }
+
+    // }
+
     async addPropertyTakeOff(tab) {
-        await this.page.locator(".lucide-plus:visible").waitFor({ state: "visible" });
-        await this.page.locator(".lucide-plus:visible").click();
+        console.log("\n===========================");
+        console.log(`🚀 START: addPropertyTakeOff('${tab}')`);
+        console.log("===========================\n");
 
-        await this.page.locator(`button:has-text('Add Property_${tab}_takeoff')`).waitFor({ state: "visible" });
-        await this.page.locator(`button:has-text('Add Property_${tab}_takeoff')`).click();
+        try {
 
-        if (tab === 'interior') {
-            // Select Floorplan
-            await this.page.locator('.ag-floating-top div[col-id="floorplan_id"]').waitFor({ state: "visible" });
-            await this.page.locator('.ag-floating-top div[col-id="floorplan_id"]').dblclick();
-            await this.page.locator('.mantine-ScrollArea-content p').first().waitFor({ state: "visible" });
-            await this.page.locator('.mantine-ScrollArea-content p').first().click();
+            console.log("⏳ Step 1 → Waiting for [+] icon to appear...");
+            await this.page.locator(".lucide-plus:visible").waitFor({ state: "visible" });
+            console.log("✔ [+] icon visible");
 
-            // unit_mix_quantity
-            await this.page.waitForLoadState("networkidle");
-            await this.page.waitForTimeout(3000);
-            const unit_mix_quantity = this.page.locator('div[row-index="0"] div[col-id="unit_mix_quantity"]');
-            await unit_mix_quantity.waitFor({ state: "visible" });
-            await unit_mix_quantity.dblclick();
-            await this.page.waitForLoadState("networkidle");
-            await this.page.waitForTimeout(3000);
-            await unit_mix_quantity.locator('input').fill('100');
-            await unit_mix_quantity.locator('input').press('Enter');
-            await this.page.waitForLoadState("networkidle");
-            await this.page.waitForTimeout(3000);
-            const cellValue = await this.page.locator('div[row-index="0"] div[col-id="count"]').textContent();
-            expect.soft(cellValue?.trim(), `Count mismatch → expected: 100, got: ${cellValue}`).toBe('100');
+            console.log("➡ Clicking [+] icon...");
+            await this.page.locator(".lucide-plus:visible").click();
+            console.log("✔ Clicked [+] icon");
 
+            console.log(`\n⏳ Step 2 → Waiting for button 'Add Property_${tab}_takeoff' ...`);
+            await this.page.locator(`button:has-text('Add Property_${tab}_takeoff')`).waitFor({ state: "visible" });
+            console.log(`✔ Button detected → Add Property_${tab}_takeoff`);
 
-        } else if (tab === 'exterior') {
-            // Select Building Type
-            await this.page.locator('.ag-floating-top div[col-id="building_type_id"]').waitFor({ state: "visible" });
-            await this.page.locator('.ag-floating-top div[col-id="building_type_id"]').dblclick();
-            await this.page.locator('.mantine-ScrollArea-content p').first().waitFor({ state: "visible" });
-            await this.page.locator('.mantine-ScrollArea-content p').first().click();
+            console.log(`➡ Clicking Add Property_${tab}_takeoff`);
+            await this.page.locator(`button:has-text('Add Property_${tab}_takeoff')`).click();
+            console.log("✔ Navigation to Add Takeoff modal triggered");
 
-            // unit_mix_quantity
-            await this.page.waitForLoadState("networkidle");
-            await this.page.waitForTimeout(3000);
-            const unit_mix_quantity = this.page.locator('div[row-index="0"] div[col-id="unit_mix_quantity"]');
-            await unit_mix_quantity.waitFor({ state: "visible" });
-            await unit_mix_quantity.dblclick();
-            await this.page.waitForLoadState("networkidle");
-            await this.page.waitForTimeout(3000);
-            await unit_mix_quantity.locator('input').fill('100');
-            await unit_mix_quantity.locator('input').press('Enter');
-            await this.page.waitForLoadState("networkidle");
-            await this.page.waitForTimeout(3000);
+            // ===================== INTERIOR =====================
+            if (tab === 'interior') {
 
-            const cellValue = await this.page.locator('div[row-index="0"] div[col-id="count"]').textContent();
-            expect.soft(cellValue?.trim(), `Count mismatch → expected: 100, got: ${cellValue}`).toBe('100');
+                console.log("\n🔵 INTERIOR TAKEOFF SELECTED");
 
+                console.log("⏳ Selecting Floorplan...");
+                await this.page.locator('.ag-floating-top div[col-id="floorplan_id"]').waitFor({ state: "visible" });
+                await this.page.locator('.ag-floating-top div[col-id="floorplan_id"]').dblclick();
+                console.log("✔ Floorplan dropdown opened");
 
+                await this.page.locator('.mantine-ScrollArea-content p').first().waitFor({ state: "visible" });
+                await this.page.locator('.mantine-ScrollArea-content p').first().click();
+                console.log("✔ First floorplan item selected");
+
+                console.log("\n⏳ Editing unit_mix_quantity...");
+                await this.page.waitForLoadState("networkidle");
+                await this.page.waitForTimeout(3000);
+
+                const qtyCell = this.page.locator('div[row-index="0"] div[col-id="unit_mix_quantity"]');
+                await qtyCell.waitFor({ state: "visible" });
+                await qtyCell.dblclick();
+                console.log("✔ unit_mix_quantity cell activated for editing");
+
+                await qtyCell.locator('input').fill('100');
+                await qtyCell.locator('input').press('Enter');
+                console.log("✔ Quantity set → 100");
+
+                await this.page.waitForLoadState("networkidle");
+                await this.page.waitForTimeout(3000);
+
+                const val = await this.page.locator('div[row-index="0"] div[col-id="count"]').textContent();
+                console.log(`📌 Count cell value read → "${val?.trim()}"`);
+
+                expect.soft(val.trim(), `Count mismatch → expected 100`).toBe('100');
+                console.log("🎉 Interior Takeoff validated successfully!");
+
+            }
+
+            // ===================== EXTERIOR =====================
+            else if (tab === 'exterior') {
+
+                console.log("\n🟠 EXTERIOR TAKEOFF SELECTED");
+
+                console.log("⏳ Selecting Building Type...");
+                await this.page.locator('.ag-floating-top div[col-id="building_type_id"]').waitFor({ state: "visible" });
+                await this.page.locator('.ag-floating-top div[col-id="building_type_id"]').dblclick();
+                console.log("✔ Building Type dropdown opened");
+
+                await this.page.locator('.mantine-ScrollArea-content p').first().waitFor({ state: "visible" });
+                await this.page.locator('.mantine-ScrollArea-content p').first().click();
+                console.log("✔ First building type selected");
+
+                console.log("\n⏳ Editing unit_mix_quantity...");
+                await this.page.waitForLoadState("networkidle");
+                await this.page.waitForTimeout(3000);
+
+                const qtyCell = this.page.locator('div[row-index="0"] div[col-id="unit_mix_quantity"]');
+                await qtyCell.waitFor({ state: "visible" });
+                await qtyCell.dblclick();
+                console.log("✔ unit_mix_quantity cell opened for edit");
+
+                await qtyCell.locator('input').fill('100');
+                await qtyCell.locator('input').press('Enter');
+                console.log("✔ Quantity set → 100");
+
+                await this.page.waitForLoadState("networkidle");
+                await this.page.waitForTimeout(3000);
+
+                const val = await this.page.locator('div[row-index="0"] div[col-id="count"]').textContent();
+                console.log(`📌 Count cell value read → "${val?.trim()}"`);
+
+                expect.soft(val.trim(), `Count mismatch → expected 100`).toBe('100');
+                console.log("🎉 Exterior Takeoff validated successfully!");
+            }
+
+            console.log("\n===============================");
+            console.log("✨ addPropertyTakeOff() SUCCESS");
+            console.log("===============================\n");
+
+        } catch (error) {
+            console.log("\n❌ ERROR in addPropertyTakeOff()");
+            console.log("📌 Tab:", tab);
+            console.log("💥 Message:", error.message);
+            console.log("📜 Stack:", error.stack);
+            throw error;
         }
-
     }
+
+
+    // async addColumnTakeOff(tab) {
+
+    //     await this.page.locator(".lucide-plus:visible").waitFor({ state: "visible" });
+    //     await this.page.locator(".lucide-plus:visible").click();
+
+    //     await this.page.locator(`button:has-text('Add Data')`).waitFor({ state: "visible" });
+    //     await this.page.locator(`button:has-text('Add Data')`).click();
+
+    //     // column
+    //     let columnName = `columnName${Date.now()}`;
+    //     await this.page.locator(`.mantine-Paper-root p:has-text('Add column')`).waitFor({ state: "visible" });
+    //     await this.page.locator(`input[placeholder="Enter column name (letters, numbers, spaces, hyphens only)"]`).fill(columnName);
+    //     await this.page.locator(`input[placeholder="Enter column description (required)"]`).fill(columnName);
+    //     await this.page.locator(`button:has-text('Text')`).click();
+    //     await this.page.locator(`button:has-text('Add column')`).click();
+
+    //     await this.page.waitForLoadState("networkidle");
+    //     await this.page.waitForTimeout(3000);
+    //     // await this.page.locator(`p:has-text('${columnName}')`).waitFor({ state: "visible" });
+    //     // await expect.soft(this.page.locator(`p:has-text('${columnName}')`)).toBeVisible();
+
+    //     // Column Assertions in Settings icon
+    //     await this.page.locator(`.lucide.lucide-settings:visible`).waitFor({ state: "visible" });
+    //     await this.page.locator(`.lucide.lucide-settings:visible`).click();
+    //     await this.page.locator(`header:has-text('Manage Columns')`).waitFor({ state: "visible" });
+    //     await expect.soft(this.page.locator(`p:has-text('${columnName}')`).nth(0)).toBeVisible();
+
+    //     await this.page.locator(`.mantine-CloseButton-root:visible`).nth(0).waitFor({ state: "visible" });
+    //     await this.page.locator(`.mantine-CloseButton-root:visible`).nth(0).click();
+    // }
 
     async addColumnTakeOff(tab) {
+        console.log("\n=================================================");
+        console.log(`🚀 START: addColumnTakeOff('${tab}')`);
+        console.log("=================================================\n");
 
-        await this.page.locator(".lucide-plus:visible").waitFor({ state: "visible" });
-        await this.page.locator(".lucide-plus:visible").click();
+        try {
+            console.log("⏳ Step 1 → Waiting for [+] button...");
+            await this.page.locator(".lucide-plus:visible").waitFor({ state: "visible" });
+            console.log("✔ [+] icon found → clicking");
+            await this.page.locator(".lucide-plus:visible").click();
 
-        await this.page.locator(`button:has-text('Add Data')`).waitFor({ state: "visible" });
-        await this.page.locator(`button:has-text('Add Data')`).click();
+            console.log("\n⏳ Step 2 → Waiting for 'Add Data' button...");
+            await this.page.locator(`button:has-text('Add Data')`).waitFor({ state: "visible" });
+            console.log("✔ 'Add Data' button visible → clicking");
+            await this.page.locator(`button:has-text('Add Data')`).click();
 
-        // column
-        let columnName = `columnName${Date.now()}`;
-        await this.page.locator(`.mantine-Paper-root p:has-text('Add column')`).waitFor({ state: "visible" });
-        await this.page.locator(`input[placeholder="Enter column name (letters, numbers, spaces, hyphens only)"]`).fill(columnName);
-        await this.page.locator(`input[placeholder="Enter column description (required)"]`).fill(columnName);
-        await this.page.locator(`button:has-text('Text')`).click();
-        await this.page.locator(`button:has-text('Add column')`).click();
+            // Create unique column
+            let columnName = `columnName_${Date.now()}`;
+            console.log(`\n🆕 Generating new column → ${columnName}`);
 
-        await this.page.waitForLoadState("networkidle");
-        await this.page.waitForTimeout(3000);
-        // await this.page.locator(`p:has-text('${columnName}')`).waitFor({ state: "visible" });
-        // await expect.soft(this.page.locator(`p:has-text('${columnName}')`)).toBeVisible();
+            console.log("⏳ Waiting for 'Add column' modal...");
+            await this.page.locator(`.mantine-Paper-root p:has-text('Add column')`).waitFor({ state: "visible" });
 
-        // Column Assertions in Settings icon
-        await this.page.locator(`.lucide.lucide-settings:visible`).waitFor({ state: "visible" });
-        await this.page.locator(`.lucide.lucide-settings:visible`).click();
-        await this.page.locator(`header:has-text('Manage Columns')`).waitFor({ state: "visible" });
-        await expect.soft(this.page.locator(`p:has-text('${columnName}')`).nth(0)).toBeVisible();
+            console.log("➡ Typing column name");
+            await this.page.locator(`input[placeholder="Enter column name (letters, numbers, spaces, hyphens only)"]`).fill(columnName);
 
-        await this.page.locator(`.mantine-CloseButton-root:visible`).nth(0).waitFor({ state: "visible" });
-        await this.page.locator(`.mantine-CloseButton-root:visible`).nth(0).click();
+            console.log("➡ Typing column description");
+            await this.page.locator(`input[placeholder="Enter column description (required)"]`).fill(columnName);
+
+            console.log("➡ Selecting Text Type");
+            await this.page.locator(`button:has-text('Text')`).click();
+
+            console.log("➡ Clicking Add Column");
+            await this.page.locator(`button:has-text('Add column')`).click();
+
+            console.log("\n⏳ Waiting for column to be created...");
+            await this.page.waitForLoadState("networkidle");
+            await this.page.waitForTimeout(3000);
+            console.log(`✔ Column submitted successfully → ${columnName}`);
+
+            // ================== Settings Column Validation ==================
+            console.log("\n🔍 Opening column settings to validate...");
+
+            await this.page.locator(`.lucide.lucide-settings:visible`).waitFor({ state: "visible" });
+            console.log("➡ Clicking settings icon");
+            await this.page.locator(`.lucide.lucide-settings:visible`).click();
+
+            console.log("⏳ Waiting for Manage Columns panel...");
+            await this.page.locator(`header:has-text('Manage Columns')`).waitFor({ state: "visible" });
+
+            console.log(`🔎 Checking newly added column exists → '${columnName}'`);
+            await expect.soft(this.page.locator(`p:has-text('${columnName}')`).nth(0))
+                .toBeVisible({ timeout: 5000 });
+
+            console.log(`🎉 COLUMN VERIFIED SUCCESSFULLY → '${columnName}'`);
+
+            console.log("\n➡ Closing Manage Columns");
+            await this.page.locator(`.mantine-CloseButton-root:visible`).nth(0).click();
+
+            console.log("\n=================================================");
+            console.log(`✨ SUCCESS: addColumnTakeOff('${tab}') complete`);
+            console.log("=================================================\n");
+        }
+
+        catch (err) {
+            console.log("\n❌ ERROR in addColumnTakeOff()");
+            console.log(`📌 Tab: ${tab}`);
+            console.log(`💥 Message: ${err.message}`);
+            console.log("📜 Stack trace →");
+            console.log(err.stack);
+            throw err;   // rethrow so test fails properly
+        }
     }
+
 }
 
 module.exports = PropertiesHelper;

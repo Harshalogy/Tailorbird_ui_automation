@@ -24,6 +24,7 @@ let city = `College Park`;
 let state = `GA`;
 let zip = `30337`;
 let property_type = propertyTypes[Math.floor(Math.random() * propertyTypes.length)];
+let garden_style = `Garden Style`;
 let mid_rise = `Mid Rise`;
 let high_rise = `High Rise`;
 let military_housing = `Military Housing`;
@@ -86,9 +87,10 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
   });
 
   test('@sanity TC03 - Validate Filters: Garden, Mid-Rise, High-Rise, and Military', async () => {
+    await prop.changeView(testData.viewName);
     await page.locator(".lucide.lucide-funnel").waitFor({ state: "visible" });
     await page.locator(".lucide.lucide-funnel").click();
-    await prop.filterProperty(property_type);
+    await prop.filterProperty(garden_style);
     await prop.filterProperty(mid_rise);
     await prop.filterProperty(high_rise);
     await prop.filterProperty(military_housing);
@@ -153,6 +155,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await expect(viewDetailsBtn).toBeVisible({ timeout: 5000 });
     await viewDetailsBtn.click();
     await page.waitForTimeout(3000);
+    console.log("✔ clicking on add data button");
     const addDataButton = page.locator('button[data-testid="bt-add-column"]');
     await addDataButton.waitFor({ state: 'visible' });
     await addDataButton.click();
@@ -317,6 +320,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await expect(takeoffsTab).toBeVisible();
     await takeoffsTab.click();
     await expect(takeoffsTab).toHaveAttribute('data-active', 'true');
+    console.log("✔ Takeoffs tab opened");
 
     // Selectors for tabs
     const interiorTab = page.locator('button[role="tab"]:has-text("Interior")');
@@ -324,7 +328,9 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
 
     // Assert both tabs are visible
     await expect(interiorTab).toBeVisible();
+    console.log("✔ Interior tab is visible");
     await expect(exteriorTab).toBeVisible();
+    console.log("✔ Exterior tab is visible");
 
     // Assert Interior is selected
     await expect(interiorTab).toHaveAttribute('aria-selected', 'true');
@@ -491,9 +497,9 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     const log = (...msg) => console.log("🔹", ...msg)
 
     const wait = async () => {
-      log("⏳ Waiting network idle + 2s")
+      log("⏳ Waiting network idle")
       try { await page.waitForLoadState("networkidle", { timeout: 15000 }); } catch { log("⚠ networkidle skipped") }
-      await page.waitForTimeout(2000)
+      await page.waitForTimeout(500)
     }
 
     const safe = async (label, fn) => {
@@ -776,7 +782,5 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await expect(downloadIcon).toBeVisible();
     await expect(cancelIcon).toBeVisible();
   });
-
-    
 
 });
