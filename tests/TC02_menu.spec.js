@@ -36,7 +36,7 @@ test.describe('Tailorbird Left Panel Flow - Modular', () => {
     });
 
     test('@sanity Verify all menu navigation', async () => {
-
+        const actualLabels = await helper.getLeftPanelLabels(page);
         expect(actualLabels.length).toBeGreaterThan(0);
 
         for (const item of data.menuItems) {
