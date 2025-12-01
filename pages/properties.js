@@ -605,6 +605,8 @@ class PropertiesHelper {
         }
 
         console.log(`\n🎉 Collapse/Expand Validation Completed Successfully\n`);
+
+        await toggles.nth(1).click();
     }
 
 

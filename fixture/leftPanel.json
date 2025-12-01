@@ -12,5 +12,17 @@
     "Documents",
     "Files",
     "Images"
+  ],
+  
+  "menuItems": [
+    { "label": "Properties",       "url": "/properties" },
+    { "label": "Projects & Jobs",  "url": "/projects" },
+    { "label": "Category",         "url": "/category" },
+    { "label": "Budget",           "url": "/budget" },
+    { "label": "CapEx",            "url": "/financials/capex" },
+    { "label": "Unit Tracker",     "url": "/unit-tracker" },
+    { "label": "Files",            "url": "/files" },
+    { "label": "Images",           "url": "/images" }
   ]
+
 }
