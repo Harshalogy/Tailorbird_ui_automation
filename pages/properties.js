@@ -535,6 +535,12 @@ class PropertiesHelper {
             const checkbox = row.locator('xpath=ancestor::div[contains(@style,"cursor")]').locator('input[type="checkbox"]');
             await expect(checkbox.first()).toBeVisible();
         }
+
+        await this.validateMultiCollapseExpand(
+            'button.mantine-ActionIcon-root:has(svg.lucide-chevron-down)'
+        );
+
+
         const randomNameRow = drawer.locator(`p:has-text("${deleteColumn}")`);
         if (await randomNameRow.count() > 0) {
             const deleteBtn = randomNameRow.locator('xpath=ancestor::div[contains(@style,"cursor")]').locator('button:has(svg.lucide-trash-2)');
@@ -545,6 +551,62 @@ class PropertiesHelper {
             console.log("✔ Custom column deleted");
         }
     }
+
+    async validateMultiCollapseExpand(buttonSelector) {
+
+        const toggles = this.page.locator(buttonSelector);
+        const total = await toggles.count();
+
+        console.log(`\n🔍 Found ${total} collapsible sections`);
+
+        if (total === 0) throw new Error("❌ No expand/collapse toggles found");
+
+        // -------------------------------
+        // STEP 1 → Collapse ALL first
+        // -------------------------------
+        console.log("\n⬇ Collapsing all sections...");
+
+        for (let i = 0; i < total; i++) await toggles.nth(i).click();
+
+        for (let i = 0; i < total; i++) {
+
+            const rows = this.page.locator(buttonSelector)
+                .nth(i)
+                .locator(`xpath=ancestor::div[contains(@style,"cursor")]/
+                      following-sibling::div//p`);
+
+            await expect(rows.first()).not.toBeVisible({ timeout: 2000 });
+        }
+
+        console.log("✔ Verified — All sections collapsed");
+
+        // -------------------------------
+        // STEP 2 → Expand and Validate One By One
+        // -------------------------------
+        console.log("\n⬆ Expanding one by one...");
+
+        for (let i = 0; i < total; i++) {
+
+            console.log(`🧪 Checking section ${i + 1}`);
+
+            await toggles.nth(i).click();   // Expand this section only
+
+            const rows = this.page.locator(buttonSelector)
+                .nth(i)
+                .locator(`xpath=ancestor::div[contains(@style,"cursor")]/
+                      following-sibling::div//p`);
+
+            await expect(rows.first()).toBeVisible({ timeout: 2000 });
+            console.log("✔ Expanded → Rows visible");
+
+            await toggles.nth(i).click();   // Collapse back
+            await expect(rows.first()).not.toBeVisible({ timeout: 2000 });
+            console.log("✔ Collapsed → Rows hidden");
+        }
+
+        console.log(`\n🎉 Collapse/Expand Validation Completed Successfully\n`);
+    }
+
 
     async openPropertyDetails(propertyName) {
         await this.changeView('Table View');

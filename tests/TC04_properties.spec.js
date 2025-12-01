@@ -8,7 +8,7 @@ import { getPropertyName } from '../utils/propertyUtils';
 import testData from '../fixture/property.json';
 const ModalHandler = require('../pages/modalHandler');
 const loc = require('../locators/locationLocator');
-
+import { propertyLocators } from '../locators/propertyLocator.js';
 
 const propertyTypes = [
   "Garden Style",
@@ -61,7 +61,7 @@ test.afterAll(async () => {
 
 test.describe('PROPERTY FLOW TEST SUITE', () => {
 
-  test('TC01 - Validate Property Export Functionality and New Property Creation', async () => {
+  test('@sanity TC01 - Validate Property Export Functionality and New Property Creation', async () => {
     await prop.exportButton();
     await prop.createProperty(name, address, city, state, zip, property_type);
 
@@ -79,13 +79,13 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     console.log(`Property data saved to: ${downloadPath}`);
   });
 
-  test('TC02 - Change Property View and Validate Search Results', async () => {
+  test('@sanity TC02 - Change Property View and Validate Search Results', async () => {
     const propertyName = getPropertyName();
     await prop.changeView(testData.viewName);
     await prop.searchProperty(propertyName);
   });
 
-  test('TC03 - Validate Filters: Garden, Mid-Rise, High-Rise, and Military', async () => {
+  test('@sanity TC03 - Validate Filters: Garden, Mid-Rise, High-Rise, and Military', async () => {
     await page.locator(".lucide.lucide-funnel").waitFor({ state: "visible" });
     await page.locator(".lucide.lucide-funnel").click();
     await prop.filterProperty(property_type);
@@ -96,7 +96,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await page.locator(".mantine-Paper-root .mantine-CloseButton-root").click();
   });
 
-  test('TC04 new - Validate All Column Headers in Table View', async () => {
+  test('@sanity TC04 - Validate All Column Headers in Table View', async () => {
     await prop.changeView('Table View');
     for (let i = 0; i < testData.expectedHeaders.length; i++) {
       await prop.scrollHorizontally(i);
@@ -107,7 +107,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await prop.scrollBackToStart();
   });
 
-  test('TC05 - Validate Overview Fields and Property Document Actions', async () => {
+  test('@sanity TC05 - Validate Overview Fields and Property Document Actions', async () => {
     const propName = getPropertyName();
     const vals = {
       "Property Name": propName,
@@ -132,7 +132,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await prop.manageColumns(testData.manageColumns.expectedColumns);
   });
 
-  test('TC06 - Validate Document Section Table', async () => {
+  test('@sanity TC06 - Validate Document Section Table', async () => {
     await prop.goto(data.dashboardUrl);
     const propertyName = getPropertyName();
     await prop.goToProperties();
@@ -143,7 +143,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await prop.validateFirstRowValues();
   });
 
-  test('TC07 - validate add data form', async () => {
+  test('@sanity TC07 - validate add data form', async () => {
     await prop.goToProperties();
     const propertyName = getPropertyName();
     console.log('Using property name:', propertyName);
@@ -171,7 +171,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     });
   });
 
-  test('TC08 - Validate Delete Property', async () => {
+  test('@sanity TC08 - Validate Delete Property', async () => {
     await prop.goto(data.dashboardUrl);
     await prop.goToProperties();
     const propertyName = getPropertyName();
@@ -180,7 +180,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await prop.deleteProperty(propertyName);
   });
 
-  test("TC09 - Validate Location Tab", async () => {
+  test("@sanity TC09 - Validate Location Tab", async () => {
     const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property)';
     console.log(`🔎 Using property name: ${propertyName}`);
 
@@ -296,7 +296,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     console.log(`✔ Building rows verified (${buildingRowCount})`);
   });
 
-  test('TC10 - validate takeoffs Interior panel and dropdowns', async () => {
+  test('@sanity TC10 - validate takeoffs Interior panel and dropdowns', async () => {
 
     await prop.goto(data.dashboardUrl);
     await prop.goToProperties();
@@ -388,7 +388,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
 
   });
 
-  test('TC11 - validate takeoffs Exterior panel and dropdowns', async () => {
+  test('@sanity TC11 - validate takeoffs Exterior panel and dropdowns', async () => {
 
     await prop.goto(data.dashboardUrl);
     await prop.goToProperties();
@@ -483,7 +483,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await prop.addColumnTakeOff('exterior');
   });
 
-  test('TC12 – asset viewer', async () => {
+  test('@sanity TC12 – asset viewer', async () => {
     await prop.goto(data.dashboardUrl);
     await prop.goToProperties();
     test.setTimeout(900000)
@@ -666,6 +666,115 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
 
     log("\n🔥 EXECUTION 100% COMPLETE — NO STOP, NO FAIL, FULL TRACE GENERATED 🔥\n")
 
+  });
+
+  test('@regression TC13 - Validate Filters: gibberish', async () => {
+    await prop.goToProperties();
+    await prop.changeView('Table View');
+    name = 'gibberish';
+    await page.locator('input[placeholder="Search..."]').fill(name);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(3000);
+    const firstRowNameCell = page.locator(propertyLocators.firstRowNameCell);
+    await expect(firstRowNameCell).not.toBeVisible();
+    console.log(`No record found : ${name}`);
+
+  });
+
+  test('@regression TC14 - validate No models available in asset viewer tab', async () => {
+    const propertyName = "property_1764215595513";
+    console.log('Using property name:', propertyName);
+
+    // Change view and search property
+    await prop.changeView('Table View');
+    await prop.searchProperty(propertyName);
+
+    // Assert 'View Details' button exists and click it
+    const viewDetailsBtn = page.locator('button[title="View Details"]').first();
+    await expect(viewDetailsBtn).toBeVisible({ timeout: 5000 });
+    await viewDetailsBtn.click();
+
+    // Click Asset Viewer tab
+    const assetViewerTab = page.locator('button:has-text("Asset Viewer")');
+    await assetViewerTab.waitFor({ state: 'visible' });
+    await assetViewerTab.click();
+
+    // ===== Assertions for Asset Viewer page =====
+
+    // Then get the panel via 'aria-controls' from the tab
+    const panelId = await assetViewerTab.getAttribute('aria-controls');
+    const assetViewerPanel = page.locator(`#${panelId}`);
+    await expect(assetViewerPanel).toBeVisible({ timeout: 5000 });
+
+
+    // Dropdowns
+    const typeDropdown = assetViewerPanel.locator('label:has-text("Type") + div input');
+    const siteDropdown = assetViewerPanel.locator('label:has-text("Site") + div input');
+    const viewDropdown = assetViewerPanel.locator('label:has-text("View") + div input');
+
+    await expect(typeDropdown).toHaveValue('Site'); // Default selected value
+    // await expect(siteDropdown).toBeEnabled();     // Initially disabled
+    // await expect(viewDropdown).toBeDisabled();     // Initially disabled
+
+    // Export button
+    const exportBtn = assetViewerPanel.locator('button:has-text("Export")');
+    await expect(exportBtn).toBeVisible();
+
+    // Placeholder text for 3D view
+    const placeholderText = assetViewerPanel.locator('text=No 3D View Selected');
+    await expect(placeholderText).toBeVisible();
+
+    const placeholderSubText = assetViewerPanel.locator('text=Select a type, item, and view from the dropdowns above');
+    await expect(placeholderSubText).toBeVisible();
+
+    const typeDropdownInput = page.locator('label:has-text("Type") + div input');
+
+    // Click to open the dropdown
+    await typeDropdownInput.click();
+    const typeDropdownPanel = page.locator('div[role="listbox"] >> text=Site');
+    await expect(typeDropdownPanel.nth(1)).toBeVisible({ timeout: 5000 });
+
+    // Assert the 3 options
+    const options = page.locator('div[role="option"]');
+    // await expect(options).toHaveCount(6);
+    await expect(options.nth(3)).toHaveText('Site');
+    await expect(options.nth(4)).toHaveText('Floorplan Types');
+    await expect(options.nth(5)).toHaveText('Building Types');
+
+    await exportBtn.click();
+
+    const drawer = page.locator('section[role="dialog"]');
+    await expect(drawer).toBeVisible({ timeout: 5000 });
+
+    // Assert the drawer title
+    const title = drawer.locator('h2 >> text=Export Views');
+    await expect(title).toBeVisible();
+
+    // Assert header buttons
+    const closeButton = drawer.locator('button[aria-label="Close"], button:has(svg)');
+    await expect(closeButton.nth(0)).toBeVisible();
+
+    // Assert top section text
+    const topText = drawer.locator('p:has-text("0 of 0 views selected")');
+    await expect(topText).toBeVisible();
+
+    // Assert Select All / Select None buttons
+    const selectAllBtn = drawer.locator('button:has-text("Select All")');
+    const selectNoneBtn = drawer.locator('button:has-text("Select None")');
+    await expect(selectAllBtn).toBeDisabled();
+    await expect(selectNoneBtn).toBeDisabled();
+
+    // Assert bottom action buttons
+    const cancelBtn = drawer.locator('button:has-text("Cancel")');
+    const downloadBtn = drawer.locator('button:has-text("Download Selected")');
+    await expect(cancelBtn).toBeVisible();
+    await expect(downloadBtn).toBeDisabled();
+
+    // Optionally assert icons exist inside buttons (Download / Cancel)
+    const downloadIcon = downloadBtn.locator('svg');
+    const cancelIcon = cancelBtn.locator('svg');
+    await expect(downloadIcon).toBeVisible();
+    await expect(cancelIcon).toBeVisible();
   });
 
 });

@@ -24,7 +24,7 @@ test.afterAll(async () => {
 
 test.describe('Tailorbird Left Panel Flow - Modular', () => {
 
-    test('Verify all menu options are available', async () => {
+    test('@sanity Verify all menu options are available', async () => {
         const actualLabels = await helper.getLeftPanelLabels(page);
 
         if (actualLabels.length === 0) throw new Error('Left panel labels not found.');
@@ -35,7 +35,7 @@ test.describe('Tailorbird Left Panel Flow - Modular', () => {
         }
     });
 
-    test('Verify main menu toggle functionality', async () => {
+    test('@sanity Verify main menu toggle functionality', async () => {
         const toggleBtn = page.locator(locators.firstLeftPanelToggle).first();
         await expect(toggleBtn).toHaveCount(1);
 
@@ -53,15 +53,15 @@ test.describe('Tailorbird Left Panel Flow - Modular', () => {
         Logger.info('[After 2nd Click] aria-expanded = ' + after2);
     });
 
-    test.skip('Verify Financials expand/collapse', async () => {
+    test.skip('@sanity Verify Financials expand/collapse', async () => {
         await helper.runTwoClickTest(page, "Financials");
     });
 
-    test.skip('Verify Trackers expand/collapse', async () => {
+    test.skip('@sanity Verify Trackers expand/collapse', async () => {
         await helper.runTwoClickTest(page, "Trackers");
     });
 
-    test.skip('Verify Documents expand/collapse', async () => {
+    test.skip('@sanity Verify Documents expand/collapse', async () => {
         await helper.runTwoClickTest(page, "Documents");
     });
 

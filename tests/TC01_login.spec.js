@@ -10,7 +10,7 @@ test.describe('Tailorbird Login Flow', () => {
   let page;
   let login;
 
-  test('User should be able to submit credentials successfully', async ({ browser }) => {
+  test('@sanity User should be able to submit credentials successfully', async ({ browser }) => {
     Logger.info('Starting Tailorbird login test...');
 
     context = await browser.newContext();
@@ -37,7 +37,7 @@ test.describe('Tailorbird Login Flow', () => {
     });
   });
 
-  test('User should be able to navigate to dashboard successfully', async ({ browser }) => {
+  test('@sanity User should be able to navigate to dashboard successfully', async ({ browser }) => {
     Logger.info('Verifying dashboard navigation after login...');
 
     context = await browser.newContext({ storageState: 'sessionState.json' });
