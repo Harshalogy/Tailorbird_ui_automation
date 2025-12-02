@@ -55,5 +55,19 @@ export const propertyLocators = {
     rowDeleteIcon: rowIndex => `.ag-pinned-right-cols-container div[row-index="${rowIndex}"] .lucide-trash-2`,
     deleteButtonInPopover: '.mantine-Popover-dropdown button:has-text("Delete")',
     deleteConfirmBtn: ".mantine-Popover-dropdown button:has-text('Delete')",
-    deleteColumnIcon: ".mantine-Group-root:has-text('Random Name') .lucide-trash2"
+    deleteColumnIcon: ".mantine-Group-root:has-text('Random Name') .lucide-trash2",
+    addColumn: 'button[data-testid="bt-add-column"]',
+    nameInputModal: 'input[placeholder^="Enter column name"]',
+    descInput :'input[placeholder^="Enter column description"]',
+    typeButtons :'div[style*="grid-template-columns"] button',
+    submitButton :'button:has-text("Add column"):not([disabled])',
+    interiorTab: 'button[role="tab"]:has-text("Interior")',
+    exteriorTab: 'button[role="tab"]:has-text("Exterior")',
+    assetViewer: 'button:has-text("Asset Viewer")',
+    selectall: 'button:has-text("Select All")',
+    selectNone: 'button:has-text("Select None")',
+    cancelbtn: 'button:has-text("Cancel")',
+    selectDownload: 'button:has-text("Download Selected")',
+
+
 };

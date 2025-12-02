@@ -1,6 +1,5 @@
 {
   "viewName": "Table View",
-
   "expectedHeaders": [
     "Name",
     "Address",
@@ -14,16 +13,13 @@
     "Budget Variance",
     "Actions"
   ],
-
   "scrollIncrement": 5,
-
   "tabs": [
     "Overview",
     "Asset Viewer",
     "Takeoffs",
     "Locations"
   ],
-
   "overviewFields": [
     {
       "label": "Ownership Group",
@@ -58,26 +54,22 @@
       "value": "0"
     }
   ],
-
   "createProperty": {
     "modalHeader": "Add property",
     "addButton": "Add Property",
     "cancelButton": "Cancel",
     "createButton": "Create Property"
   },
-
   "addressSample": "Domestic Terminal, College Park, GA 30337, USA",
   "citySample": "College Park",
   "stateSample": "GA",
   "zipSample": "30337",
-
   "propertyType": {
     "garden": "Garden Style",
     "midRise": "Mid Rise",
     "highRise": "High Rise",
     "military": "Military Housing"
   },
-
   "documentsSection": {
     "header": "Property Documents",
     "subHeader": "Files and images related to this property",
@@ -91,7 +83,6 @@
       "Powered by Uploadcare"
     ]
   },
-
   "manageColumns": {
     "expectedColumns": [
       "Cover",
@@ -112,14 +103,12 @@
     "columnDescPlaceholder": "Enter column description",
     "submitButton": "Add column"
   },
-
   "uploadActions": {
     "deviceUpload": "From device",
     "done": "Done",
     "clearAll": "Clear all",
     "addFiles": "Add Files"
   },
-
   "userInvite": {
     "inviteButtonText": "Invite",
     "invitedBadgeText": "Invited",
@@ -134,9 +123,11 @@
     "resendSuccessCloseButton": "Close",
     "editRoleDialogTitle": "Edit Role",
     "saveButtonText": "Save",
-    "roles": ["Admin", "User"]
+    "roles": [
+      "Admin",
+      "User"
+    ]
   },
-
   "exportDrawer": {
     "title": "Export Views",
     "cancel": "Cancel",
@@ -144,7 +135,6 @@
     "selectAll": "Select All",
     "selectNone": "Select None"
   },
-
   "assetViewerLabels": {
     "type": "Type",
     "site": "Site",
@@ -152,6 +142,25 @@
     "no3DMain": "No 3D View Selected",
     "no3DSub": "Select a type, item, and view from the dropdowns above"
   },
+  "takeoffTabHeaders": [
+    "Floor Plan Type",
+    "Floor Plan Type Area",
+    "Total Floor Plan Type Quantity",
+    "Unit Mix Floor Plan Type Quantity",
+    "Location/Room",
+    "Level",
+    "Item Category",
+    "Item Subcategory",
+    "Item",
+    "SKU",
+    "Item Count",
+    "Item UOM",
+    "Qauntity Per Item",
+    "Total Quantity",
+    "Wastage (%)",
+    "Total Including Wastage",
+    "Actions"
+  ],
 
   "noResultsText": "No results found"
 }

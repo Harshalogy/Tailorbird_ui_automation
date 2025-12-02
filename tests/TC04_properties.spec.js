@@ -40,14 +40,10 @@ test.beforeAll(async ({ browser }) => {
       const elements = document.querySelectorAll('main, .mantine-AppShell-navbar');
       elements.forEach(el => {
         el.style.zoom = '70%';
-        // For transform instead of zoom:
-        // el.style.transform = 'scale(0.7)';
-        // el.style.transformOrigin = 'top left';
       });
     });
   });
 
-  // apply zoom immediately too
   await page.evaluate(() => {
     const elements = document.querySelectorAll('main, .mantine-AppShell-navbar');
     elements.forEach(el => {
@@ -71,10 +67,8 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     };
     const downloadPath = path.join(process.cwd(), 'downloads', 'property.json');
 
-    // Ensure the folder exists
     fs.mkdirSync(path.dirname(downloadPath), { recursive: true });
 
-    // Write JSON file
     fs.writeFileSync(downloadPath, JSON.stringify(propertyData, null, 2), 'utf-8');
 
     console.log(`Property data saved to: ${downloadPath}`);
@@ -151,27 +145,10 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     console.log('Using property name:', propertyName);
     await prop.changeView('Table View');
     await prop.searchProperty(propertyName);
-    const viewDetailsBtn = page.locator('button[title="View Details"]').first();
-    await expect(viewDetailsBtn).toBeVisible({ timeout: 5000 });
-    await viewDetailsBtn.click();
-    await page.waitForTimeout(3000);
-    console.log("✔ clicking on add data button");
-    const addDataButton = page.locator('button[data-testid="bt-add-column"]');
-    await addDataButton.waitFor({ state: 'visible' });
-    await addDataButton.click();
-    const nameInputModal = page.locator('input[placeholder^="Enter column name"]');
-    const descInput = page.locator('input[placeholder^="Enter column description"]');
-    const typeButtons = page.locator('div[style*="grid-template-columns"] button');
-    const submitButton = page.locator('button:has-text("Add column"):not([disabled])');
-    const modal = new ModalHandler(page);
-    await modal.addData({
-      nameInputLocator: nameInputModal,
-      descInputLocator: descInput,
-      typeButtonsLocator: typeButtons,
-      submitButtonLocator: submitButton,
-      name: 'Random Name',
-      description: 'Random_description_' + Date.now()
-    });
+    await prop.viewDetailsButton();
+    await prop.addDataColoumn();
+    await prop.addData();
+
   });
 
   test('@sanity TC08 - Validate Delete Property', async () => {
@@ -186,117 +163,24 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
   test("@sanity TC09 - Validate Location Tab", async () => {
     const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property)';
     console.log(`🔎 Using property name: ${propertyName}`);
-
-    // Change view & search property
     await prop.changeView('Table View');
     console.log("✔ Changed to Table View");
-
     await prop.searchProperty(propertyName);
     console.log("✔ Property searched successfully");
+    await prop.viewDetailsButton();
+    await prop.openLocationTab();
+    await prop.addButton();
+    await prop.addRowDetail();
+    await prop.deleteRow();
+    await prop.addButton();
+    await prop.addColumndata();
+    await prop.settingsPanel();
+    await prop.deleteCustomColumn();
+    await prop.selectLocation("unit");
+    await prop.expectUnitTable();
+    await prop.selectLocation("building");
+    await prop.expectBuildingTable();
 
-    // VIEW DETAILS
-    const viewDetailsBtn = page.locator('button[title="View Details"]').first();
-    await expect(viewDetailsBtn).toBeVisible({ timeout: 5000 });
-    await viewDetailsBtn.click();
-
-    // LOCATION TAB
-    const locationsTab = page.locator(loc.locationsTab);
-    await expect(locationsTab).toBeVisible();
-    await locationsTab.click();
-    await expect(locationsTab).toHaveAttribute('data-active', 'true');
-    console.log("✔ Locations tab opened");
-
-    // ADD SITE
-    const addButton = page.locator(loc.addButton);
-    await addButton.waitFor({ state: 'visible' });
-    await addButton.click();
-    console.log("✔ Add dropdown opened");
-
-    // Select Add Site
-    const addSite = page.locator(loc.addSite);
-    await expect(addSite).toBeVisible();
-    await addSite.click();
-
-    const newRow = page.getByRole('row', { name: /—/ }).first();
-    await expect(newRow).toBeVisible();
-    console.log("✔ New empty row visible");
-
-    // Add Name
-    await page.locator(loc.nameCell).dblclick();
-    await page.locator(loc.nameInput).fill("My Test Name");
-    await page.keyboard.press("Enter");
-    console.log("✔ New site name added");
-
-    await page.waitForTimeout(1500);
-
-    // DELETE ROW
-    const deleteRow = page.locator(loc.deleteRowBtn).first();
-    await deleteRow.click({ delay: 200 });
-    await page.locator(loc.deleteConfirmBtn).click();
-    console.log("✔ Row deleted");
-
-    // ADD DATA
-    await addButton.click();
-    const addData = page.locator(loc.addDataOption);
-    await expect(addData).toBeVisible();
-    await addData.click();
-
-    // MODAL – Add Column
-    const modal = page.locator(loc.modal_AddColumn);
-    await expect(modal).toBeVisible();
-    console.log("✔ Add Column modal open");
-
-    await page.locator(loc.columnNameInput).fill("Test Column");
-    await page.locator(loc.descriptionInput).fill("This is a test description.");
-    await page.locator(loc.addColumnBtn).waitFor({ state: "visible" });
-    await expect(page.locator(loc.addColumnBtn)).toBeEnabled();
-
-    await page.locator(loc.addColumnBtn).click();
-    console.log("✔ New column added");
-
-    // SETTINGS PANEL
-    await page.locator(loc.tableSettingBtn).click();
-
-    const drawer = page.locator(loc.settingsDrawer);
-    await expect(drawer).toBeVisible();
-    await expect(drawer.locator(loc.drawerTitle)).toBeVisible();
-    await expect(drawer.locator(loc.drawerClose)).toBeVisible();
-    await expect(drawer.locator(loc.defaultColumnText)).toBeVisible();
-    await expect(drawer.locator(loc.customColumnsText)).toBeVisible();
-    console.log("✔ Settings drawer validated");
-
-    // DELETE COLUMN
-    await page.locator(loc.deleteColumnIcon).click();
-    await page.locator(loc.deleteConfirmBtn).click();
-    console.log("✔ Custom column deleted");
-
-    // LOCATION DROPDOWN FUNCTION
-    async function selectLocation(type) {
-      await page.click(loc.locationDropdown);
-      await page.click(loc.locationDropdownOption(type));
-      console.log(`✔ Location switched to: ${type}`);
-    }
-
-    // UNIT VALIDATION
-    await selectLocation("unit");
-    await expect(page.locator(loc.unitHeader)).toBeVisible();
-
-    const unitRowCount = await page.locator(loc.visibleRows).count();
-    expect(unitRowCount).toBeGreaterThan(1);
-    console.log(`✔ Unit rows verified (${unitRowCount})`);
-
-    // BUILDING VALIDATION
-    await selectLocation("building");
-
-    const headers = ['Name', 'Building', 'Site', 'Actions'];
-    for (const header of headers) {
-      await expect(page.getByRole('columnheader', { name: header })).toBeVisible();
-    }
-    console.log("✔ Building header validation complete");
-
-    const buildingRowCount = await page.locator('div[role="row"]').count();
-    expect(buildingRowCount).toBeGreaterThan(1);
-    console.log(`✔ Building rows verified (${buildingRowCount})`);
   });
 
   test('@sanity TC10 - validate takeoffs Interior panel and dropdowns', async () => {
@@ -305,91 +189,20 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await prop.goToProperties();
     const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property)';
     console.log(`🔎 Using property name: ${propertyName}`);
-
-    // Change view & search property
     await prop.changeView('Table View');
     await prop.searchProperty(propertyName);
-
-    // VIEW DETAILS button
-    const viewDetailsBtn = page.locator('button[title="View Details"]').first();
-    await expect(viewDetailsBtn).toBeVisible({ timeout: 5000 });
-    await viewDetailsBtn.click();
-
-    // TAKEOFFS TAB
-    const takeoffsTab = page.locator('button:has-text("Takeoffs")');
-    await expect(takeoffsTab).toBeVisible();
-    await takeoffsTab.click();
-    await expect(takeoffsTab).toHaveAttribute('data-active', 'true');
-    console.log("✔ Takeoffs tab opened");
-
-    // Selectors for tabs
-    const interiorTab = page.locator('button[role="tab"]:has-text("Interior")');
-    const exteriorTab = page.locator('button[role="tab"]:has-text("Exterior")');
-
-    // Assert both tabs are visible
-    await expect(interiorTab).toBeVisible();
-    console.log("✔ Interior tab is visible");
-    await expect(exteriorTab).toBeVisible();
-    console.log("✔ Exterior tab is visible");
-
-    // Assert Interior is selected
-    await expect(interiorTab).toHaveAttribute('aria-selected', 'true');
-    await expect(interiorTab).toHaveAttribute('data-active', 'true');
-
-    // Assert Exterior is NOT selected
-    await expect(exteriorTab).toHaveAttribute('aria-selected', 'false');
-    await expect(exteriorTab).not.toHaveAttribute('data-active', 'true');
-
-    const expectedHeaders = [
-      "Floor Plan Type",
-      "Floor Plan Type Area",
-      "Total Floor Plan Type Quantity",
-      "Unit Mix Floor Plan Type Quantity",
-      "Location/Room",
-      "Level",
-      "Item Category",
-      "Item Subcategory",
-      "Item",
-      "SKU",
-      "Item Count",
-      "Item UOM",
-      "Qauntity Per Item",
-      "Total Quantity",
-      "Wastage (%)",
-      "Total Including Wastage",
-      "Actions"
-    ];
-
+    await prop.viewDetailsButton();
+    await prop.takeoffOption();
+    await prop.interiorANDexteriorTab();
     const headerLocator = page.locator('.ag-header-cell .mantine-Text-root:visible');
     const scrollContainer = page.locator('.ag-center-cols-viewport');
-
     console.log("[STEP] Checking header count...");
     // await expect(headerLocator).toHaveCount(expectedHeaders.length);
     console.log("[INFO] Header count matches.");
-
-    // Export button
     await prop.exportButton();
-
-    // FILTERS
-    await page.locator(".mantine-ActionIcon-icon .lucide.lucide-funnel:visible").waitFor({ state: "visible" });
-    await page.locator(".mantine-ActionIcon-icon .lucide.lucide-funnel:visible").click();
-    await prop.filterPropertyNew('CALEDESI');
-    await prop.filterPropertyNew('CAPTIVA');
-    await prop.filterPropertyNew('CLEARWTR');
-    await prop.filterPropertyNew('DESOTO');
-    await prop.filterPropertyNew('MADEIRA');
-    await page.locator(".mantine-Paper-root .mantine-CloseButton-root").waitFor({ state: "visible" });
-    await page.locator(".mantine-Paper-root .mantine-CloseButton-root").click();
-
-
-    // Unit Mix
+    await prop.filtertab();
     await prop.unitMix();
-
-    // Add Property Interior TakeOff
-    // ERROR: Applicaton failed to respond
     await prop.addPropertyTakeOff('interior');
-
-    // Add Column Interior TakeOff
     await prop.addColumnTakeOff('interior');
 
   });
@@ -398,94 +211,21 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
 
     await prop.goto(data.dashboardUrl);
     await prop.goToProperties();
-
     const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property)';
     console.log(`🔎 Using property name: ${propertyName}`);
-
-    // Change view & search property
     await prop.changeView('Table View');
     await prop.searchProperty(propertyName);
-
-    // VIEW DETAILS button
-    const viewDetailsBtn = page.locator('button[title="View Details"]').first();
-    await expect(viewDetailsBtn).toBeVisible({ timeout: 5000 });
-    await viewDetailsBtn.click();
-
-    // TAKEOFFS TAB
-    const takeoffsTab = page.locator('button:has-text("Takeoffs")');
-    await expect(takeoffsTab).toBeVisible();
-    await takeoffsTab.click();
-    await expect(takeoffsTab).toHaveAttribute('data-active', 'true');
-
-    // Selectors for tabs
-    const interiorTab = page.locator('button[role="tab"]:has-text("Interior")');
-    const exteriorTab = page.locator('button[role="tab"]:has-text("Exterior")');
-
-    // Assert both tabs are visible
-    await expect(interiorTab).toBeVisible();
-    await expect(exteriorTab).toBeVisible();
-
-    // Assert Interior is selected
-    await expect(interiorTab).toHaveAttribute('aria-selected', 'true');
-    await expect(interiorTab).toHaveAttribute('data-active', 'true');
-
-    // Assert Exterior is NOT selected
-    await expect(exteriorTab).toHaveAttribute('aria-selected', 'false');
-    await expect(exteriorTab).not.toHaveAttribute('data-active', 'true');
-
-    // Click Exterior tab
-    await exteriorTab.click();
-
-    const expectedHeaders = [
-      "Floor Plan Type",
-      "Floor Plan Type Area",
-      "Total Floor Plan Type Quantity",
-      "Unit Mix Floor Plan Type Quantity",
-      "Location/Room",
-      "Level",
-      "Item Category",
-      "Item Subcategory",
-      "Item",
-      "SKU",
-      "Item Count",
-      "Item UOM",
-      "Qauntity Per Item",
-      "Total Quantity",
-      "Wastage (%)",
-      "Total Including Wastage",
-      "Actions"
-    ];
-
+    await prop.viewDetailsButton();
+    await prop.takeoffOption();
+    await prop.interiorANDexteriorTab();
+    await prop.clickExteriortab();
     const headerLocator = page.locator('.ag-header-cell .mantine-Text-root:visible');
     const scrollContainer = page.locator('.ag-center-cols-viewport');
-
     console.log("[STEP] Checking header count...");
-    // await expect(headerLocator).toHaveCount(expectedHeaders.length);
     console.log("[INFO] Header count matches.");
-
-    // Export button
     await prop.exportButton();
-
-    // // FILTERS
-    // await page.locator(".mantine-ActionIcon-icon .lucide.lucide-funnel:visible").waitFor({ state: "visible" });
-    // await page.locator(".mantine-ActionIcon-icon .lucide.lucide-funnel:visible").click();
-    // await prop.filterPropertyNew('CALEDESI');
-    // await prop.filterPropertyNew('CAPTIVA');
-    // await prop.filterPropertyNew('CLEARWTR');
-    // await prop.filterPropertyNew('DESOTO');
-    // await prop.filterPropertyNew('MADEIRA');
-    // await page.locator(".mantine-Paper-root .mantine-CloseButton-root").waitFor({ state: "visible" });
-    // await page.locator(".mantine-Paper-root .mantine-CloseButton-root").click();
-
-
-    // Unit Mix
     await prop.unitMix();
-
-    // Add Property Exterior TakeOff
-    // ERROR: Applicaton failed to respond
     await prop.addPropertyTakeOff('exterior');
-
-    // Add Column Exterior TakeOff
     await prop.addColumnTakeOff('exterior');
   });
 
@@ -497,13 +237,13 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     const log = (...msg) => console.log("🔹", ...msg)
 
     const wait = async () => {
-      log("⏳ Waiting network idle")
+      log("Waiting network idle")
       try { await page.waitForLoadState("networkidle", { timeout: 15000 }); } catch { log("⚠ networkidle skipped") }
       await page.waitForTimeout(500)
     }
 
     const safe = async (label, fn) => {
-      log(`▶ START: ${label}`)
+      log(`START: ${label}`)
       try { await wait(); await fn(); log(`✔ DONE: ${label}`) }
       catch (e) { log(`❗ FAIL: ${label}`, e.message) }
     }
@@ -513,88 +253,69 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
         const c = await page.locator("img").count()
         if (c > 0) {
           let src = await page.locator("img").first().getAttribute("src")
-          log(`📷 IMAGE FOUND → ${src}`)
+          log(`IMAGE FOUND → ${src}`)
           return src
         }
       } catch { }
-      log("⚠ NO IMAGE FOUND")
+      log("NO IMAGE FOUND")
       return null
     }
-
-    //━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // PAGE FLOW LOGGING
-    //━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     await safe("Changing table view", async () => await prop.changeView("Table View"))
     await safe("Searching property", async () => await prop.searchProperty("Harbor Bay at MacDill 01_Liberty Cove (Sample Property 01)"))
     await safe("Opening View Details", async () => await page.locator('button[title="View Details"]').first().click({ force: true }))
     await safe("Opening Asset Viewer", async () => await page.locator('button:has-text("Asset Viewer")').click({ force: true }))
 
-    //━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // WAIT UNTIL PANEL EXISTS
-    //━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    log("🔍 Getting Asset Viewer panel id...")
+    log("Getting Asset Viewer panel id...")
     let tab = page.locator('button:has-text("Asset Viewer")')
     let id = await tab.getAttribute("aria-controls")
 
     while (!id) {
-      log("⏳ aria-controls not ready → retrying")
+      log("aria-controls not ready → retrying")
       await page.waitForTimeout(500)
       id = await tab.getAttribute("aria-controls")
     }
 
-    log("📌 PANEL ID =", id)
+    log("PANEL ID =", id)
     let pnl = page.locator(`#${id}`)
 
     await pnl.waitFor({ state: "visible", timeout: 30000 })
-    log("🟩 PANEL LOADED & VISIBLE")
+    log("PANEL LOADED & VISIBLE")
 
     await wait()
 
-    //━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // COLLECT DROPDOWNS
-    //━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
     const labels = await pnl.locator("label").allTextContents()
-    log("🔍 DROPDOWN LABELS DETECTED →", labels)
+    log("DROPDOWN LABELS DETECTED →", labels)
 
     const dropdowns = labels.map(l => ({
       name: l.trim(),
       input: pnl.locator(`label:has-text("${l.trim()}") + div input`)
     })).filter(x => x.name.length > 0)
 
-    log(`🎛 TOTAL DROPDOWNS FOUND = ${dropdowns.length}`)
+    log(`TOTAL DROPDOWNS FOUND = ${dropdowns.length}`)
 
     let REPORT = []
 
-
-    //━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // CORE LOOP — FULL TRACING EACH STEP
-    //━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
     for (const dd of dropdowns) {
-
-      log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-      log(`🔽 PROCESSING DROPDOWN → ${dd.name}`)
-      log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+      log(`PROCESSING DROPDOWN → ${dd.name}`)
 
       let out = { dropdown: dd.name, options: [], results: [], disabled: false }
 
       await wait()
 
       let count = await dd.input.count()
-      log(`📊 INPUT COUNT for '${dd.name}' = ${count}`)
+      log(`INPUT COUNT for '${dd.name}' = ${count}`)
 
-      if (count === 0) { log("⚠ DROPDOWN INPUT NOT FOUND → SKIPPING"); REPORT.push(out); continue }
+      if (count === 0) { log("DROPDOWN INPUT NOT FOUND → SKIPPING"); REPORT.push(out); continue }
 
       let loc = count === 1 ? dd.input : dd.input.first()
-      if (count > 1) log(`⚠ MULTIPLE MATCHES → using first()`)
+      if (count > 1) log(`MULTIPLE MATCHES → using first()`)
 
       let enabled = await loc.isEnabled().catch(() => false)
-      log(`🔐 DROPDOWN '${dd.name}' ENABLED? →`, enabled)
+      log(`DROPDOWN '${dd.name}' ENABLED? →`, enabled)
 
       if (!enabled) {
-        log(`⛔ '${dd.name}' DISABLED — FULL SKIP`)
+        log(` '${dd.name}' DISABLED — FULL SKIP`)
         out.disabled = true
         REPORT.push(out)
         continue
@@ -605,30 +326,27 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
       let list = page.locator(`#${await loc.getAttribute("aria-controls")} [role='option']`)
       let total = await list.count()
 
-      log(`📋 OPTION COUNT for '${dd.name}' = ${total}`)
+      log(`OPTION COUNT for '${dd.name}' = ${total}`)
 
-      if (total === 0) { log("⚠ ZERO OPTIONS → SKIP"); REPORT.push(out); continue }
-      if (total > 20) { log("⚠ VISIBILITY FILTER ACTIVATED"); list = list.filter({ has: page.locator("[role='option']:visible") }); total = await list.count() }
+      if (total === 0) { log("ZERO OPTIONS → SKIP"); REPORT.push(out); continue }
+      if (total > 20) { log("VISIBILITY FILTER ACTIVATED"); list = list.filter({ has: page.locator("[role='option']:visible") }); total = await list.count() }
 
-      // ─────────────────────────────────────────────
-      // OPTION LOOP — FULL TRACE LOGGING
-      // ─────────────────────────────────────────────
       for (let i = 0; i < total; i++) {
 
-        log(`\n🔸 DROPDOWN '${dd.name}' → OPTION ${i + 1}/${total}`)
+        log(`\n DROPDOWN '${dd.name}' → OPTION ${i + 1}/${total}`)
 
         await wait()
 
         let raw = await list.nth(i).innerText().catch(() => null)
         if (!raw) {
-          log("⚠ FAILED TO READ OPTION TEXT → SKIP")
+          log("FAILED TO READ OPTION TEXT → SKIP")
           continue
         }
 
         let option = raw.split("\n")[0].trim()
         out.options.push(option)
 
-        log(`🟦 Selecting option → ${option}`)
+        log(`Selecting option → ${option}`)
 
         let before = await getImg()
         await safe(`Clicking option '${option}'`, async () => await list.nth(i).click({ force: true }))
@@ -636,20 +354,20 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
         let after = await getImg()
 
         if (before === null && after === null) {
-          log(`⚠ NO IMAGE FOR '${option}' → SKIPPED BUT CONTINUING`)
+          log(`NO IMAGE FOR '${option}' → SKIPPED BUT CONTINUING`)
           out.results.push({ option, image: "none" })
         }
         else if (before !== after) {
-          log(`✔ IMAGE UPDATED for '${option}'`)
+          log(`IMAGE UPDATED for '${option}'`)
           out.results.push({ option, imageChanged: true })
         }
         else {
-          log(`❗ IMAGE STATIC for '${option}'`)
+          log(`IMAGE STATIC for '${option}'`)
           out.results.push({ option, imageChanged: false })
         }
 
         if (i < total - 1) {
-          log(`↻ Reopening '${dd.name}' for next option`)
+          log(`Reopening '${dd.name}' for next option`)
           await safe(`Reopen dropdown '${dd.name}'`, async () => await loc.click({ force: true }))
         }
       }
@@ -657,11 +375,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
       REPORT.push(out)
     }
 
-    //━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // EXPORT JSON WITH COMPLETE TRACE DATA
-    //━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-    log("\n📄 EXPORTING FULL JSON LOG → dropdown_report.json")
+    log("\n EXPORTING FULL JSON LOG → dropdown_report.json")
 
     await page.evaluate(r => {
       const a = document.createElement("a")
@@ -670,7 +384,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
       a.click()
     }, REPORT)
 
-    log("\n🔥 EXECUTION 100% COMPLETE — NO STOP, NO FAIL, FULL TRACE GENERATED 🔥\n")
+    log("\n EXECUTION 100% COMPLETE — NO STOP, NO FAIL, FULL TRACE GENERATED 🔥\n")
 
   });
 
@@ -678,9 +392,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await prop.goToProperties();
     await prop.changeView('Table View');
     name = 'gibberish';
-    await page.locator('input[placeholder="Search..."]').fill(name);
-    await page.waitForLoadState("networkidle");
-    await page.waitForTimeout(3000);
+    await prop.searchInvalidProperty(name);
     const firstRowNameCell = page.locator(propertyLocators.firstRowNameCell);
     await expect(firstRowNameCell).not.toBeVisible();
     console.log(`No record found : ${name}`);
@@ -690,161 +402,72 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
   test('@regression TC14 - validate No models available in asset viewer tab', async () => {
     const propertyName = "property_1764215595513";
     console.log('Using property name:', propertyName);
-
-    // Change view and search property
     await prop.changeView('Table View');
     await prop.searchProperty(propertyName);
-
-    // Assert 'View Details' button exists and click it
-    const viewDetailsBtn = page.locator('button[title="View Details"]').first();
-    await expect(viewDetailsBtn).toBeVisible({ timeout: 5000 });
-    await viewDetailsBtn.click();
-
-    // Click Asset Viewer tab
-    const assetViewerTab = page.locator('button:has-text("Asset Viewer")');
-    await assetViewerTab.waitFor({ state: 'visible' });
-    await assetViewerTab.click();
-
-    // ===== Assertions for Asset Viewer page =====
-
-    // Then get the panel via 'aria-controls' from the tab
-    const panelId = await assetViewerTab.getAttribute('aria-controls');
-    const assetViewerPanel = page.locator(`#${panelId}`);
-    await expect(assetViewerPanel).toBeVisible({ timeout: 5000 });
-
-
-    // Dropdowns
-    const typeDropdown = assetViewerPanel.locator('label:has-text("Type") + div input');
-    const siteDropdown = assetViewerPanel.locator('label:has-text("Site") + div input');
-    const viewDropdown = assetViewerPanel.locator('label:has-text("View") + div input');
-
-    await expect(typeDropdown).toHaveValue('Site'); // Default selected value
-    // await expect(siteDropdown).toBeEnabled();     // Initially disabled
-    // await expect(viewDropdown).toBeDisabled();     // Initially disabled
-
-    // Export button
-    const exportBtn = assetViewerPanel.locator('button:has-text("Export")');
-    await expect(exportBtn).toBeVisible();
-
-    // Placeholder text for 3D view
-    const placeholderText = assetViewerPanel.locator('text=No 3D View Selected');
-    await expect(placeholderText).toBeVisible();
-
-    const placeholderSubText = assetViewerPanel.locator('text=Select a type, item, and view from the dropdowns above');
-    await expect(placeholderSubText).toBeVisible();
-
-    const typeDropdownInput = page.locator('label:has-text("Type") + div input');
-
-    // Click to open the dropdown
-    await typeDropdownInput.click();
-    const typeDropdownPanel = page.locator('div[role="listbox"] >> text=Site');
-    await expect(typeDropdownPanel.nth(1)).toBeVisible({ timeout: 5000 });
-
-    // Assert the 3 options
-    const options = page.locator('div[role="option"]');
-    // await expect(options).toHaveCount(6);
-    await expect(options.nth(3)).toHaveText('Site');
-    await expect(options.nth(4)).toHaveText('Floorplan Types');
-    await expect(options.nth(5)).toHaveText('Building Types');
-
-    await exportBtn.click();
-
-    const drawer = page.locator('section[role="dialog"]');
-    await expect(drawer).toBeVisible({ timeout: 5000 });
-
-    // Assert the drawer title
-    const title = drawer.locator('h2 >> text=Export Views');
-    await expect(title).toBeVisible();
-
-    // Assert header buttons
-    const closeButton = drawer.locator('button[aria-label="Close"], button:has(svg)');
-    await expect(closeButton.nth(0)).toBeVisible();
-
-    // Assert top section text
-    const topText = drawer.locator('p:has-text("0 of 0 views selected")');
-    await expect(topText).toBeVisible();
-
-    // Assert Select All / Select None buttons
-    const selectAllBtn = drawer.locator('button:has-text("Select All")');
-    const selectNoneBtn = drawer.locator('button:has-text("Select None")');
-    await expect(selectAllBtn).toBeDisabled();
-    await expect(selectNoneBtn).toBeDisabled();
-
-    // Assert bottom action buttons
-    const cancelBtn = drawer.locator('button:has-text("Cancel")');
-    const downloadBtn = drawer.locator('button:has-text("Download Selected")');
-    await expect(cancelBtn).toBeVisible();
-    await expect(downloadBtn).toBeDisabled();
-
-    // Optionally assert icons exist inside buttons (Download / Cancel)
-    const downloadIcon = downloadBtn.locator('svg');
-    const cancelIcon = cancelBtn.locator('svg');
-    await expect(downloadIcon).toBeVisible();
-    await expect(cancelIcon).toBeVisible();
+    await prop.viewDetailsButton();
+    await prop.clickAssetViewer();
+    await prop.assetViewerpanel();
+    await prop.exportBtn();
+    await prop.placeholder_Text();
+    await prop.assertOptions();
+    await prop.clickexportBtn();
+    await prop.assertselectAllOption();
+    await prop.bottonActionassertion();
+    await prop.iconAssertion()
   });
 
   test("@sanity TC15 - Validate add Units rows inside Locations and no duplicate row added", async () => {
     const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property)';
-    console.log(`🔎 Using property name: ${propertyName}`);
+    console.log(`Using property name: ${propertyName}`);
 
     // Change view & search property
     await prop.changeView('Table View');
-    console.log("✔ Changed to Table View");
+    console.log("Changed to Table View");
 
     await prop.searchProperty(propertyName);
-    console.log("✔ Property searched successfully");
+    console.log("Property searched successfully");
 
-    // VIEW DETAILS
     const viewDetailsBtn = page.locator('button[title="View Details"]').first();
     await expect(viewDetailsBtn).toBeVisible({ timeout: 5000 });
     await viewDetailsBtn.click();
 
-    // LOCATION TAB
     const locationsTab = page.locator(loc.locationsTab);
     await expect(locationsTab).toBeVisible();
     await locationsTab.click();
     await expect(locationsTab).toHaveAttribute('data-active', 'true');
-    console.log("✔ Locations tab opened");
+    console.log("Locations tab opened");
 
-    // LOCATION DROPDOWN FUNCTION
     async function selectLocation(type) {
       await page.click(loc.locationDropdown);
       await page.click(loc.locationDropdownOption(type));
-      console.log(`✔ Location switched to: ${type}`);
+      console.log(`Location switched to: ${type}`);
     }
 
-    // select unit from location dropdown
     await selectLocation("unit");
     await expect(page.locator(loc.unitHeader)).toBeVisible();
 
-    // ADD SITE
     const addButton = page.locator(loc.addButton);
     await addButton.waitFor({ state: 'visible' });
     await addButton.click();
-    console.log("✔ Add dropdown opened");
+    console.log("Add dropdown opened");
 
-    // Select Add Site
     const addSite = page.locator(loc.addSite);
     await expect(addSite).toBeVisible();
     await addSite.click();
 
     const newRow = page.getByRole('row', { name: /—/ }).first();
     await expect(newRow).toBeVisible();
-    console.log("✔ New empty row visible");
+    console.log("New empty row visible");
 
-    // Add Name
     await page.locator(loc.nameCell).nth(0).dblclick();
     await page.locator(loc.nameInput).fill("A new unit");
     await page.keyboard.press("Enter");
-    console.log("✔ New site name added");
+    console.log("New site name added");
 
     await page.waitForTimeout(1500);
 
     const unitName = "A new unit";
 
-    // ---------------------------------------------
-    //                DOWNLOAD CSV
-    // ---------------------------------------------
     const downloadPromise = page.waitForEvent("download");
     await page.click('.mantine-ActionIcon-icon .lucide-download:visible');
     const download = await downloadPromise;
@@ -853,13 +476,8 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     const filePath = await download.path();
     const csvText = fs.readFileSync(filePath, "utf8");
 
-    console.log("\n================ RAW CSV =================");
     console.log(csvText);
-    console.log("==========================================\n");
 
-    // ---------------------------------------------
-    //              CSV PARSER (NO PAPAPARSE)
-    // ---------------------------------------------
     function parseCSV(csv) {
       const lines = csv.trim().split("\n");
 
@@ -867,7 +485,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
         .split(",")
         .map(h => h.trim().replace(/^"|"$/g, ""));
 
-      console.log("🔍 CSV Headers:", headers);
+      console.log("CSV Headers:", headers);
 
       return lines.slice(1).map((line, index) => {
         const values = line
@@ -876,7 +494,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
 
         const rowObj = Object.fromEntries(headers.map((h, i) => [h, values[i]]));
 
-        console.log(`📄 Row ${index + 1}:`, rowObj);
+        console.log(`Row ${index + 1}:`, rowObj);
 
         return rowObj;
       });
@@ -884,29 +502,21 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
 
     const parsedData = parseCSV(csvText);
 
-    console.log("\n================ PARSED JSON =================");
     console.log(parsedData);
-    console.log("==============================================\n");
 
-    // Detect the unit column automatically (supports: Unit, Unit Name, UnitName)
     const unitColumn = Object.keys(parsedData[0]).find(k =>
       k.toLowerCase().includes("unit")
     );
 
-    console.log("🔍 Detected Unit Column →", unitColumn);
+    console.log(" Detected Unit Column →", unitColumn);
     expect(unitColumn).toBeTruthy();
 
-    // Find matching rows
     const rowsWithUnit = parsedData.filter(row => row[unitColumn] === unitName);
 
-    console.log(`\n🔎 Found "${unitName}" in ${rowsWithUnit.length} row(s)`);
+    console.log(`\n Found "${unitName}" in ${rowsWithUnit.length} row(s)`);
 
-    // Ensure unit appears exactly once
     expect(rowsWithUnit.length).toBe(1);
 
-    // ---------------------------------------------
-    //                    DELETE ROW
-    // ---------------------------------------------
     const deleteRow = page.locator(loc.deleteRowBtn).first();
     await deleteRow.click({ delay: 200 });
     await page.locator(loc.deleteConfirmBtn).click();

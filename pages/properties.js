@@ -1,8 +1,10 @@
 const { expect } = require("@playwright/test");
 const loc = require("../locators/organization");
 const data = require("../fixture/organization.json");
+const ModalHandler = require('../pages/modalHandler');
 import { propertyLocators } from '../locators/propertyLocator.js';
 import testData from '../fixture/property.json';
+const prop = require('../locators/locationLocator');
 
 class PropertiesHelper {
     constructor(page) {
@@ -1242,7 +1244,259 @@ class PropertiesHelper {
             throw err;   // rethrow so test fails properly
         }
     }
+    async viewDetailsButton() {
+        const viewDetailsBtn = this.page.locator(propertyLocators.viewDetailsButton).first();
+        await expect(viewDetailsBtn).toBeVisible({ timeout: 5000 });
+        await viewDetailsBtn.click();
+        await this.page.waitForTimeout(3000);
+    }
+    async addDataColoumn() {
+        console.log("✔ clicking on add data button");
+        const addDataButton = this.page.locator(propertyLocators.addColumn);
+        await addDataButton.waitFor({ state: 'visible' });
+        await addDataButton.click();
+    }
+    async addData() {
 
+        const nameInputModal = this.page.locator(propertyLocators.nameInputModal);
+        const descInput = this.page.locator(propertyLocators.descInput);
+        const typeButtons = this.page.locator(propertyLocators.typeButtons);
+        const submitButton = this.page.locator(propertyLocators.submitButton);
+        const modal = new ModalHandler(this.page);
+        await modal.addData({
+            nameInputLocator: nameInputModal,
+            descInputLocator: descInput,
+            typeButtonsLocator: typeButtons,
+            submitButtonLocator: submitButton,
+            name: 'Random Name',
+            description: 'Random_description_' + Date.now()
+        });
+
+    }
+    async openLocationTab() {
+        const locationsTab = this.page.locator(prop.locationsTab);
+        await expect(locationsTab).toBeVisible();
+        await locationsTab.click();
+        await expect(locationsTab).toHaveAttribute('data-active', 'true');
+        console.log("✔ Locations tab opened");
+
+    }
+    async addButton() {
+        const addButton = this.page.locator(prop.addButton);
+        await addButton.waitFor({ state: 'visible' });
+        await addButton.click();
+        console.log("✔ Add dropdown opened");
+
+    }
+    async addRowDetail() {
+
+        // Select Add Site
+        const addSite = this.page.locator(prop.addSite);
+        await expect(addSite).toBeVisible();
+        await addSite.click();
+        const newRow = this.page.getByRole('row', { name: /—/ }).first();
+        await expect(newRow).toBeVisible();
+
+        // Add Name
+        await this.page.locator(prop.nameCell).dblclick();
+        await this.page.locator(prop.nameInput).fill("My Test Name");
+        await this.page.keyboard.press("Enter");
+        await this.page.waitForTimeout(1500);
+        console.log("✔ New site name added");
+    }
+    async deleteRow() {
+        const deleteRow = this.page.locator(prop.deleteRowBtn).first();
+        await deleteRow.click({ delay: 200 });
+        await this.page.locator(prop.deleteConfirmBtn).click();
+        console.log("✔ Row deleted");
+    }
+    async addColumndata() {
+        const addData = this.page.locator(prop.addDataOption);
+        await expect(addData).toBeVisible();
+        await addData.click();
+
+        // MODAL – Add Column
+        const modal = this.page.locator(prop.modal_AddColumn);
+        await expect(modal).toBeVisible();
+        console.log("✔ Add Column modal open");
+
+        await this.page.locator(prop.columnNameInput).fill("Test Column");
+        await this.page.locator(prop.descriptionInput).fill("This is a test description.");
+        await this.page.locator(prop.addColumnBtn).waitFor({ state: "visible" });
+        await expect(this.page.locator(prop.addColumnBtn)).toBeEnabled();
+
+        await this.page.locator(prop.addColumnBtn).click();
+        console.log("✔ New column added");
+    }
+    async settingsPanel() {
+        await this.page.locator(prop.tableSettingBtn).click();
+
+        const drawer = this.page.locator(prop.settingsDrawer);
+        await expect(drawer).toBeVisible();
+        await expect(drawer.locator(prop.drawerTitle)).toBeVisible();
+        await expect(drawer.locator(prop.drawerClose)).toBeVisible();
+        await expect(drawer.locator(prop.defaultColumnText)).toBeVisible();
+        await expect(drawer.locator(prop.customColumnsText)).toBeVisible();
+        console.log("✔ Settings drawer validated");
+    }
+    async deleteCustomColumn() {
+        await this.page.locator(prop.deleteColumnIcon).click();
+        await this.page.locator(prop.deleteConfirmBtn).click();
+        console.log("✔ Custom column deleted");
+    }
+    async selectLocation(type) {
+        await this.page.click(prop.locationDropdown);
+        await this.page.click(prop.locationDropdownOption(type));
+        console.log(`✔ Location switched to: ${type}`);
+    }
+    async expectUnitTable() {
+        await expect(this.page.locator(prop.unitHeader)).toBeVisible();
+        const unitRowCount = await this.page.locator(prop.visibleRows).count();
+        expect(unitRowCount).toBeGreaterThan(1);
+        console.log(`✔ Unit rows verified (${unitRowCount})`);
+    }
+    async expectBuildingTable() {
+        const headers = ['Name', 'Building', 'Site', 'Actions'];
+        for (const header of headers) {
+            await expect(this.page.getByRole('columnheader', { name: header })).toBeVisible();
+        }
+        console.log("✔ Building header validation complete");
+
+        const buildingRowCount = await this.page.locator('div[role="row"]').count();
+        expect(buildingRowCount).toBeGreaterThan(1);
+        console.log(`✔ Building rows verified (${buildingRowCount})`);
+    }
+    async takeoffOption() {
+        const takeoffsTab = this.page.locator('button:has-text("Takeoffs")');
+        await expect(takeoffsTab).toBeVisible();
+        await takeoffsTab.click();
+        await expect(takeoffsTab).toHaveAttribute('data-active', 'true');
+        console.log("✔ Takeoffs tab opened");
+    }
+    async interiorANDexteriorTab() {
+        // Selectors for tabs
+        const interiorTab = this.page.locator(propertyLocators.interiorTab);
+        const exteriorTab = this.page.locator(propertyLocators.exteriorTab);
+
+        // Assert both tabs are visible
+        await expect(interiorTab).toBeVisible();
+        console.log("✔ Interior tab is visible");
+        await expect(exteriorTab).toBeVisible();
+        console.log("✔ Exterior tab is visible");
+
+        // Assert Interior is selected
+        await expect(interiorTab).toHaveAttribute('aria-selected', 'true');
+        await expect(interiorTab).toHaveAttribute('data-active', 'true');
+
+        // Assert Exterior is NOT selected
+        await expect(exteriorTab).toHaveAttribute('aria-selected', 'false');
+        await expect(exteriorTab).not.toHaveAttribute('data-active', 'true');
+
+    }
+    async filtertab() {
+        await this.page.locator(".mantine-ActionIcon-icon .lucide.lucide-funnel:visible").waitFor({ state: "visible" });
+        await this.page.locator(".mantine-ActionIcon-icon .lucide.lucide-funnel:visible").click();
+        await this.filterPropertyNew('CALEDESI');
+        await this.filterPropertyNew('CAPTIVA');
+        await this.filterPropertyNew('CLEARWTR');
+        await this.filterPropertyNew('DESOTO');
+        await this.filterPropertyNew('MADEIRA');
+        await this.page.locator(".mantine-Paper-root .mantine-CloseButton-root").waitFor({ state: "visible" });
+        await this.page.locator(".mantine-Paper-root .mantine-CloseButton-root").click();
+    }
+    async clickExteriortab() {
+        const exteriorTab = this.page.locator(propertyLocators.exteriorTab);
+        await exteriorTab.click();
+    }
+    async searchInvalidProperty(name) {
+        await this.page.locator('input[placeholder="Search..."]').fill(name);
+        await this.page.waitForLoadState("networkidle");
+        await this.page.waitForTimeout(3000);
+    }
+    async clickAssetViewer() {
+        const assetViewerTab = this.page.locator(propertyLocators.assetViewer);
+        await assetViewerTab.waitFor({ state: 'visible' });
+        await assetViewerTab.click();
+    }
+
+    async exportBtn() {
+        const assetViewerTab = this.page.locator(propertyLocators.assetViewer);
+        const panelId = await assetViewerTab.getAttribute('aria-controls');
+        const assetViewerPanel = this.page.locator(`#${panelId}`);
+        const exportBtn = assetViewerPanel.locator('button:has-text("Export")');
+        await expect(exportBtn).toBeVisible();
+    }
+    async clickexportBtn() {
+        const assetViewerTab = this.page.locator(propertyLocators.assetViewer);
+        const panelId = await assetViewerTab.getAttribute('aria-controls');
+        const assetViewerPanel = this.page.locator(`#${panelId}`);
+        const exportBtn = assetViewerPanel.locator('button:has-text("Export")');
+        await exportBtn.click();
+    }
+    async placeholder_Text() {
+        const assetViewerTab = this.page.locator(propertyLocators.assetViewer);
+        const panelId = await assetViewerTab.getAttribute('aria-controls');
+        const assetViewerPanel = this.page.locator(`#${panelId}`);
+        const placeholderText = assetViewerPanel.locator('text=No 3D View Selected');
+        await expect(placeholderText).toBeVisible();
+        const placeholderSubText = assetViewerPanel.locator('text=Select a type, item, and view from the dropdowns above');
+        await expect(placeholderSubText).toBeVisible();
+        const typeDropdownInput = this.page.locator('label:has-text("Type") + div input');
+        await typeDropdownInput.click();
+        const typeDropdownPanel = this.page.locator('div[role="listbox"] >> text=Site');
+        await expect(typeDropdownPanel.nth(1)).toBeVisible({ timeout: 5000 });
+    }
+    async assertOptions() {
+        const options = this.page.locator('div[role="option"]');
+        // await expect(options).toHaveCount(6);
+        await expect(options.nth(3)).toHaveText('Site');
+        await expect(options.nth(4)).toHaveText('Floorplan Types');
+        await expect(options.nth(5)).toHaveText('Building Types');
+    }
+    async assertselectAllOption() {
+        const drawer = this.page.locator('section[role="dialog"]');
+        await expect(drawer).toBeVisible({ timeout: 5000 });
+        const title = drawer.locator('h2 >> text=Export Views');
+        await expect(title).toBeVisible();
+        const closeButton = drawer.locator('button[aria-label="Close"], button:has(svg)');
+        await expect(closeButton.nth(0)).toBeVisible();
+        const topText = drawer.locator('p:has-text("0 of 0 views selected")');
+        await expect(topText).toBeVisible();
+        const selectAllBtn = drawer.locator(propertyLocators.selectall);
+        const selectNoneBtn = drawer.locator(propertyLocators.selectNone);
+        await expect(selectAllBtn).toBeDisabled();
+        await expect(selectNoneBtn).toBeDisabled();
+    }
+    async bottonActionassertion() {
+        const drawer = this.page.locator('section[role="dialog"]');
+        await expect(drawer).toBeVisible({ timeout: 5000 });
+        const cancelBtn = drawer.locator(propertyLocators.cancelbtn);
+        const downloadBtn = drawer.locator(propertyLocators.selectDownload);
+        await expect(cancelBtn).toBeVisible();
+        await expect(downloadBtn).toBeDisabled();
+    }
+    async iconAssertion() {
+        const drawer = this.page.locator('section[role="dialog"]');
+        const cancelBtn = drawer.locator(propertyLocators.cancelbtn);
+        const downloadBtn = drawer.locator(propertyLocators.selectDownload);
+        const downloadIcon = downloadBtn.locator('svg');
+        const cancelIcon = cancelBtn.locator('svg');
+        await expect(downloadIcon).toBeVisible();
+        await expect(cancelIcon).toBeVisible();
+    }
+    async assetViewerpanel() {
+        const assetViewerTab = this.page.locator(propertyLocators.assetViewer)
+        const panelId = await assetViewerTab.getAttribute('aria-controls');
+        const assetViewerPanel = this.page.locator(`#${panelId}`);
+        await expect(assetViewerPanel).toBeVisible({ timeout: 5000 });
+        const typeDropdown = assetViewerPanel.locator('label:has-text("Type") + div input');
+        const siteDropdown = assetViewerPanel.locator('label:has-text("Site") + div input');
+        const viewDropdown = assetViewerPanel.locator('label:has-text("View") + div input');
+
+        await expect(typeDropdown).toHaveValue('Site'); // Default selected value
+        // await expect(siteDropdown).toBeEnabled();     // Initially disabled
+        // await expect(viewDropdown).toBeDisabled();     // Initially disabled
+    }
 }
 
 module.exports = PropertiesHelper;
