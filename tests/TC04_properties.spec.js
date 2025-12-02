@@ -783,4 +783,134 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await expect(cancelIcon).toBeVisible();
   });
 
+  test("@sanity TC15 - Validate add Units rows inside Locations and no duplicate row added", async () => {
+    const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property)';
+    console.log(`🔎 Using property name: ${propertyName}`);
+
+    // Change view & search property
+    await prop.changeView('Table View');
+    console.log("✔ Changed to Table View");
+
+    await prop.searchProperty(propertyName);
+    console.log("✔ Property searched successfully");
+
+    // VIEW DETAILS
+    const viewDetailsBtn = page.locator('button[title="View Details"]').first();
+    await expect(viewDetailsBtn).toBeVisible({ timeout: 5000 });
+    await viewDetailsBtn.click();
+
+    // LOCATION TAB
+    const locationsTab = page.locator(loc.locationsTab);
+    await expect(locationsTab).toBeVisible();
+    await locationsTab.click();
+    await expect(locationsTab).toHaveAttribute('data-active', 'true');
+    console.log("✔ Locations tab opened");
+
+    // LOCATION DROPDOWN FUNCTION
+    async function selectLocation(type) {
+      await page.click(loc.locationDropdown);
+      await page.click(loc.locationDropdownOption(type));
+      console.log(`✔ Location switched to: ${type}`);
+    }
+
+    // select unit from location dropdown
+    await selectLocation("unit");
+    await expect(page.locator(loc.unitHeader)).toBeVisible();
+
+    // ADD SITE
+    const addButton = page.locator(loc.addButton);
+    await addButton.waitFor({ state: 'visible' });
+    await addButton.click();
+    console.log("✔ Add dropdown opened");
+
+    // Select Add Site
+    const addSite = page.locator(loc.addSite);
+    await expect(addSite).toBeVisible();
+    await addSite.click();
+
+    const newRow = page.getByRole('row', { name: /—/ }).first();
+    await expect(newRow).toBeVisible();
+    console.log("✔ New empty row visible");
+
+    // Add Name
+    await page.locator(loc.nameCell).nth(0).dblclick();
+    await page.locator(loc.nameInput).fill("A new unit");
+    await page.keyboard.press("Enter");
+    console.log("✔ New site name added");
+
+    await page.waitForTimeout(1500);
+
+    const unitName = "A new unit";
+
+    // ---------------------------------------------
+    //                DOWNLOAD CSV
+    // ---------------------------------------------
+    const downloadPromise = page.waitForEvent("download");
+    await page.click('.mantine-ActionIcon-icon .lucide-download:visible');
+    const download = await downloadPromise;
+
+    const fs = require("fs");
+    const filePath = await download.path();
+    const csvText = fs.readFileSync(filePath, "utf8");
+
+    console.log("\n================ RAW CSV =================");
+    console.log(csvText);
+    console.log("==========================================\n");
+
+    // ---------------------------------------------
+    //              CSV PARSER (NO PAPAPARSE)
+    // ---------------------------------------------
+    function parseCSV(csv) {
+      const lines = csv.trim().split("\n");
+
+      const headers = lines[0]
+        .split(",")
+        .map(h => h.trim().replace(/^"|"$/g, ""));
+
+      console.log("🔍 CSV Headers:", headers);
+
+      return lines.slice(1).map((line, index) => {
+        const values = line
+          .split(",")
+          .map(v => v.trim().replace(/^"|"$/g, ""));
+
+        const rowObj = Object.fromEntries(headers.map((h, i) => [h, values[i]]));
+
+        console.log(`📄 Row ${index + 1}:`, rowObj);
+
+        return rowObj;
+      });
+    }
+
+    const parsedData = parseCSV(csvText);
+
+    console.log("\n================ PARSED JSON =================");
+    console.log(parsedData);
+    console.log("==============================================\n");
+
+    // Detect the unit column automatically (supports: Unit, Unit Name, UnitName)
+    const unitColumn = Object.keys(parsedData[0]).find(k =>
+      k.toLowerCase().includes("unit")
+    );
+
+    console.log("🔍 Detected Unit Column →", unitColumn);
+    expect(unitColumn).toBeTruthy();
+
+    // Find matching rows
+    const rowsWithUnit = parsedData.filter(row => row[unitColumn] === unitName);
+
+    console.log(`\n🔎 Found "${unitName}" in ${rowsWithUnit.length} row(s)`);
+
+    // Ensure unit appears exactly once
+    expect(rowsWithUnit.length).toBe(1);
+
+    // ---------------------------------------------
+    //                    DELETE ROW
+    // ---------------------------------------------
+    const deleteRow = page.locator(loc.deleteRowBtn).first();
+    await deleteRow.click({ delay: 200 });
+    await page.locator(loc.deleteConfirmBtn).click();
+    console.log("✔ Row deleted");
+  });
+
 });
