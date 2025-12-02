@@ -176,6 +176,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await prop.addColumndata();
     await prop.settingsPanel();
     await prop.deleteCustomColumn();
+    await page.locator('.mantine-Drawer-close').click();
     async function selectLocation(type) {
       await page.click(loc.locationDropdown);
       await page.click(loc.locationDropdownOption(type));
@@ -422,6 +423,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
   });
 
   test("@sanity TC15 - Validate add Units rows inside Locations and no duplicate row added", async () => {
+    await prop.goto(data.dashboardUrl);
     await prop.goToProperties();
     await prop.changeView('Table View');
     const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property)';
