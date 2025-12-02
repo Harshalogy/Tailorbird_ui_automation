@@ -1345,7 +1345,7 @@ class PropertiesHelper {
         console.log("✔ Custom column deleted");
     }
     async selectLocation(type) {
-        await this.page.click(prop.locationDropdown);
+        await this.page.click(prop.locationDropdown, {force:true});
         await this.page.click(prop.locationDropdownOption(type));
         console.log(`✔ Location switched to: ${type}`);
     }
