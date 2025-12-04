@@ -271,6 +271,9 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await safe("Opening View Details", async () => await page.locator('button[title="View Details"]').first().click({ force: true }))
     await safe("Opening Asset Viewer", async () => await page.locator('button:has-text("Asset Viewer")').click({ force: true }))
 
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(3000);
+    
     log("Getting Asset Viewer panel id...")
     let tab = page.locator('button:has-text("Asset Viewer")')
     let id = await tab.getAttribute("aria-controls")
