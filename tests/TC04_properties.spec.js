@@ -78,6 +78,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     const propertyName = getPropertyName();
     await prop.changeView(testData.viewName);
     await prop.searchProperty(propertyName);
+    await prop.clearSearch("");
   });
 
   test('@sanity TC03 - Validate Filters: Garden, Mid-Rise, High-Rise, and Military', async () => {
