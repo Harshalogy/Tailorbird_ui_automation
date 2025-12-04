@@ -1312,6 +1312,11 @@ class PropertiesHelper {
         }
     }
 
+     async clearSearch(name){
+        await this.page.locator('input[placeholder="Search..."]').fill(name);
+        await this.page.waitForLoadState("networkidle");
+        await this.page.waitForTimeout(3000);
+    }
 }
 
 module.exports = PropertiesHelper;
