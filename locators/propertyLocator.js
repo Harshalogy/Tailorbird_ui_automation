@@ -48,8 +48,8 @@ export const propertyLocators = {
     downloadIcon: '.lucide-download',
 
     searchInput: 'input[placeholder="Search."]',
-    // firstRowNameCell: '.ag-center-cols-container div[role="row"] div[col-id="name"]',
-    firstRowNameCell: '.ag-center-cols-container div[role="row"] div[col-id="title"]',
+    firstRowNameCell: '.ag-center-cols-container div[role="row"] div[col-id="name"]',
+    firstRowNameCellText: '.ag-center-cols-container div[role="row"] div[col-id="title"]',
 
     propertyNameCell: name => `.ag-center-cols-container p[title="${name}"], span:has-text("${name}")`,
     rowFromCell: "xpath=ancestor::div[@role='row']",

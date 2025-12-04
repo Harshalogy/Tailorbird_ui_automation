@@ -285,7 +285,7 @@ class ProjectPage {
         await this.page.waitForLoadState("networkidle");
         await this.page.waitForTimeout(2000);
 
-        const firstRowNameCell = this.page.locator(propertyLocators.firstRowNameCell).first();
+        const firstRowNameCell = this.page.locator(propertyLocators.firstRowNameCellText).first();
 
         const text = await firstRowNameCell.innerText();
         Logger.info(`First row text → "${text}"`);
