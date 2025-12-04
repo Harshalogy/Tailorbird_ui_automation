@@ -10,6 +10,7 @@ module.exports = {
     addButton: 'button[data-testid="bt-add-row-menu"]:visible',
     addSite: '[data-testid="bt-add-row"]',
     addDataOption: 'role=menuitem[name="Add Data"]',
+    addUnitOption: 'role=menuitem[name="Add Unit"]',
 
     // Grid elements
     newRow: 'role=row[name*="—"] >> nth=0',

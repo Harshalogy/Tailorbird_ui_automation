@@ -121,7 +121,6 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await prop.validateTabs();
     await prop.validateOverviewFields(vals);
 
-
     await prop.uploadPropertyDocument(path.resolve("./files/property_data.csv"));
     await prop.exportButton();
 

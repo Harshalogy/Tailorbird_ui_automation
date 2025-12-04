@@ -1345,7 +1345,7 @@ class PropertiesHelper {
         console.log("✔ Custom column deleted");
     }
     async selectLocation(type) {
-        await this.page.click(prop.locationDropdown, {force:true});
+        await this.page.click(prop.locationDropdown, { force: true });
         await this.page.click(prop.locationDropdownOption(type));
         console.log(`✔ Location switched to: ${type}`);
     }
@@ -1497,6 +1497,25 @@ class PropertiesHelper {
         // await expect(siteDropdown).toBeEnabled();     // Initially disabled
         // await expect(viewDropdown).toBeDisabled();     // Initially disabled
     }
+
+    async validateJobDetails(fields) {
+        const jobFields = [
+            { label: "Job Name", value: fields["Job Name"] },
+            { label: "Job Type", value: fields["Job Type"] },
+            { label: "Description", value: fields["Description"] }
+        ];
+
+        for (const field of jobFields) {
+            const labelEl = this.page.locator(`text="${field.label}"`).first();
+            const valueEl = labelEl.locator('xpath=..//following-sibling::div//p').first();
+            await expect(valueEl).toBeVisible({ timeout: 10000 });
+
+            console.log(`[ASSERT] ${field.label} → Expected: ${field.value}`);
+
+            await expect(valueEl).toHaveText(String(field.value), { timeout: 10000 });
+        }
+    }
+
 }
 
 module.exports = PropertiesHelper;
