@@ -46,29 +46,6 @@ class PropertiesHelper {
         await expect(this.page).toHaveURL(/.*\/properties/);
     }
 
-    // async createProperty(name, address, city, state, zip, type) {
-    //     await this.page.waitForLoadState("networkidle");
-    //     await this.page.waitForTimeout(3000);
-    //     await this.page.locator(propertyLocators.createPropertyButton).waitFor({ state: "visible" });
-    //     await this.page.locator(propertyLocators.createPropertyButton).click({ force: true });
-    //     await this.page.locator(propertyLocators.addPropertyModalHeader).waitFor({ state: "visible" });
-    //     await this.verifyModalFields();
-    //     await this.nameInput.fill(name);
-    //     await this.addressInput.fill(address);
-    //     await this.page.locator(propertyLocators.addressSuggestion(address)).nth(0).waitFor({ state: "visible" });
-    //     await this.page.locator(propertyLocators.addressSuggestion(address)).nth(0).click();
-    //     await this.typeInput.fill(type);
-    //     await this.page.locator(propertyLocators.propertyTypeOption(type)).waitFor({ state: "visible" });
-    //     await this.page.locator(propertyLocators.propertyTypeOption(type)).click();
-    //     await this.page.waitForLoadState("networkidle");
-    //     await this.page.waitForTimeout(3000);
-    //     await this.addPropertyBtn.click();
-    //     await this.page.locator(`.mantine-Breadcrumbs-root:has-text('${name}')`).waitFor({ state: "visible" });
-    //     await this.page.locator(propertyLocators.propertiesNavLink).nth(0).waitFor({ state: "visible" });
-    //     await this.page.locator(propertyLocators.propertiesNavLink).nth(0).click();
-    //     await this.page.locator(`.mantine-SimpleGrid-root p:has-text('${name}')`).nth(0).waitFor({ state: "visible" });
-    // }
-
     async createProperty(name, address, city, state, zip, type) {
         console.log("=== 🏠 START: Create Property Flow ===");
 
@@ -182,24 +159,6 @@ class PropertiesHelper {
         await this.page.locator(propertyLocators.clearAllFiltersLink).waitFor({ state: "visible" });
         await this.page.locator(propertyLocators.clearAllFiltersLink).click();
     }
-
-    // async exportButton() {
-
-    //     const [download] = await Promise.all([
-    //         this.page.waitForEvent("download"),
-    //         this.page.click('.mantine-ActionIcon-icon .lucide-download:visible')
-    //     ]);
-
-    //     // Get file name
-    //     const fileName = download.suggestedFilename();
-    //     console.log("Downloaded:", fileName);
-
-    //     // Save to desired folder
-    //     await download.saveAs(`./downloads/${fileName}`);
-
-    //     // Assert file is downloaded
-    //     expect(fileName).toMatch(/\.xlsx$|\.csv$|\.pdf$/);
-    // }
 
     async exportButton() {
         console.log("\n========== 📁 EXPORT FILE FLOW STARTED ==========\n");
@@ -668,9 +627,6 @@ class PropertiesHelper {
 
         if (total === 0) throw new Error("❌ No expand/collapse toggles found");
 
-        // -------------------------------
-        // STEP 1 → Collapse ALL first
-        // -------------------------------
         console.log("\n⬇ Collapsing all sections...");
 
         for (let i = 0; i < total; i++) await toggles.nth(i).click();
@@ -687,9 +643,6 @@ class PropertiesHelper {
 
         console.log("✔ Verified — All sections collapsed");
 
-        // -------------------------------
-        // STEP 2 → Expand and Validate One By One
-        // -------------------------------
         console.log("\n⬆ Expanding one by one...");
 
         for (let i = 0; i < total; i++) {
@@ -716,7 +669,6 @@ class PropertiesHelper {
         await toggles.nth(1).click();
     }
 
-
     async openPropertyDetails(propertyName) {
         await this.changeView('Table View');
         await this.searchProperty(propertyName);
@@ -725,15 +677,6 @@ class PropertiesHelper {
         await viewBtn.click();
         await expect(this.page).toHaveURL(/properties\/details/);
     }
-
-    // async validatePropertyDocumentsSection() {
-    //     const header = this.page.locator(propertyLocators.documentsHeader);
-    //     const subHeader = this.page.locator(propertyLocators.documentsSubHeader);
-    //     const uploadButton = this.page.locator(propertyLocators.uploadFilesBtn);
-    //     await expect(header).toBeVisible();
-    //     await expect(subHeader).toBeVisible();
-    //     await expect(uploadButton.first()).toBeVisible();
-    // }
 
     async validatePropertyDocumentsSection() {
 
@@ -779,17 +722,6 @@ class PropertiesHelper {
         }
     }
 
-    // async validateFirstRowValues() {
-    //     const firstRow = this.page.locator(propertyLocators.tableRows).first();
-    //     const cells = firstRow.locator(propertyLocators.tableRowCells);
-    //     const count = await cells.count();
-    //     for (let i = 0; i < count; i++) {
-    //         const text = await cells.nth(i).innerText();
-    //         console.log(`Cell ${i}: ${text}`);
-    //         expect(text.trim().length).toBeGreaterThan(0);
-    //     }
-    // }
-
     async validateFirstRowValues() {
 
         console.log("\n========== 📄 VALIDATE FIRST TABLE ROW VALUES START ==========\n");
@@ -829,49 +761,11 @@ class PropertiesHelper {
         console.log("\n========== 📄 VALIDATION END ==========\n");
     }
 
-
     async openAddDataModal() {
         const btn = this.page.locator(propertyLocators.addDataButton);
         await btn.waitFor({ state: 'visible' });
         await btn.click();
     }
-
-    // async filterPropertyNew(type) {
-
-    //     await this.page.locator(".mantine-Paper-root p:has-text('Filter')").waitFor({ state: "visible" });
-
-    //     // convert "Garden Style" to "garden_style"
-    //     await this.page.locator(`.mantine-Checkbox-labelWrapper label:has-text("${type}")`).waitFor({ state: "visible" });
-    //     await this.page.locator(`.mantine-Checkbox-labelWrapper label:has-text("${type}")`).click();
-
-    //     await this.page.waitForLoadState("networkidle");
-    //     await this.page.waitForTimeout(3000);
-
-    //     const badges = this.page.locator('.ag-center-cols-container div[col-id="floorplan_id"]');
-
-    //     const count = await badges.count();
-
-    //     if (count === 0) {
-    //         console.log(`Checking "${type}" filter has no data in the table.`);
-    //         await this.page.locator('.mantine-Paper-root a:has-text("Clear All Filters")').waitFor({ state: "visible" });
-    //         await this.page.locator('.mantine-Paper-root a:has-text("Clear All Filters")').click();
-    //         return; // ❗ prevent further execution
-    //     }
-
-    //     const firstBadge = badges.first();
-
-    //     // Wait ONLY for first badge, not networkidle
-    //     await firstBadge.waitFor({ state: "visible", timeout: 5000 });
-
-    //     const text = (await firstBadge.textContent()).trim();
-    //     expect(text).toBe(type);
-
-    //     console.log(`Checking "${type}" filter gives "${count}" rows are visible in the table.`);
-
-
-    //     await this.page.locator('.mantine-Paper-root a:has-text("Clear All Filters")').waitFor({ state: "visible" });
-    //     await this.page.locator('.mantine-Paper-root a:has-text("Clear All Filters")').click();
-    // }
 
     async filterPropertyNew(type) {
 
@@ -970,82 +864,20 @@ class PropertiesHelper {
 
     }
 
-    // async addPropertyTakeOff(tab) {
-    //     await this.page.locator(".lucide-plus:visible").waitFor({ state: "visible" });
-    //     await this.page.locator(".lucide-plus:visible").click();
-
-    //     await this.page.locator(`button:has-text('Add Property_${tab}_takeoff')`).waitFor({ state: "visible" });
-    //     await this.page.locator(`button:has-text('Add Property_${tab}_takeoff')`).click();
-
-    //     if (tab === 'interior') {
-    //         // Select Floorplan
-    //         await this.page.locator('.ag-floating-top div[col-id="floorplan_id"]').waitFor({ state: "visible" });
-    //         await this.page.locator('.ag-floating-top div[col-id="floorplan_id"]').dblclick();
-    //         await this.page.locator('.mantine-ScrollArea-content p').first().waitFor({ state: "visible" });
-    //         await this.page.locator('.mantine-ScrollArea-content p').first().click();
-
-    //         // unit_mix_quantity
-    //         await this.page.waitForLoadState("networkidle");
-    //         await this.page.waitForTimeout(3000);
-    //         const unit_mix_quantity = this.page.locator('div[row-index="0"] div[col-id="unit_mix_quantity"]');
-    //         await unit_mix_quantity.waitFor({ state: "visible" });
-    //         await unit_mix_quantity.dblclick();
-    //         await this.page.waitForLoadState("networkidle");
-    //         await this.page.waitForTimeout(3000);
-    //         await unit_mix_quantity.locator('input').fill('100');
-    //         await unit_mix_quantity.locator('input').press('Enter');
-    //         await this.page.waitForLoadState("networkidle");
-    //         await this.page.waitForTimeout(3000);
-    //         const cellValue = await this.page.locator('div[row-index="0"] div[col-id="count"]').textContent();
-    //         expect.soft(cellValue?.trim(), `Count mismatch → expected: 100, got: ${cellValue}`).toBe('100');
-
-
-    //     } else if (tab === 'exterior') {
-    //         // Select Building Type
-    //         await this.page.locator('.ag-floating-top div[col-id="building_type_id"]').waitFor({ state: "visible" });
-    //         await this.page.locator('.ag-floating-top div[col-id="building_type_id"]').dblclick();
-    //         await this.page.locator('.mantine-ScrollArea-content p').first().waitFor({ state: "visible" });
-    //         await this.page.locator('.mantine-ScrollArea-content p').first().click();
-
-    //         // unit_mix_quantity
-    //         await this.page.waitForLoadState("networkidle");
-    //         await this.page.waitForTimeout(3000);
-    //         const unit_mix_quantity = this.page.locator('div[row-index="0"] div[col-id="unit_mix_quantity"]');
-    //         await unit_mix_quantity.waitFor({ state: "visible" });
-    //         await unit_mix_quantity.dblclick();
-    //         await this.page.waitForLoadState("networkidle");
-    //         await this.page.waitForTimeout(3000);
-    //         await unit_mix_quantity.locator('input').fill('100');
-    //         await unit_mix_quantity.locator('input').press('Enter');
-    //         await this.page.waitForLoadState("networkidle");
-    //         await this.page.waitForTimeout(3000);
-
-    //         const cellValue = await this.page.locator('div[row-index="0"] div[col-id="count"]').textContent();
-    //         expect.soft(cellValue?.trim(), `Count mismatch → expected: 100, got: ${cellValue}`).toBe('100');
-
-
-    //     }
-
-    // }
-
     async addPropertyTakeOff(tab) {
-        console.log("\n===========================");
-        console.log(`🚀 START: addPropertyTakeOff('${tab}')`);
-        console.log("===========================\n");
+        console.log(`START: addPropertyTakeOff('${tab}')`);
 
         try {
 
-            console.log("⏳ Step 1 → Waiting for [+] icon to appear...");
+            console.log("Step 1 → Waiting for add icon to appear...");
             await this.page.locator(".lucide-plus:visible").waitFor({ state: "visible" });
-            console.log("✔ [+] icon visible");
+            console.log("Add icon visible");
 
-            console.log("➡ Clicking [+] icon...");
             await this.page.locator(".lucide-plus:visible").click();
-            console.log("✔ Clicked [+] icon");
+            console.log("Clicked add icon");
 
-            console.log(`\n⏳ Step 2 → Waiting for button 'Add Property_${tab}_takeoff' ...`);
+            console.log(`Step 2 → Waiting for button 'Add Property_${tab}_takeoff' ...`);
             await this.page.locator(`button:has-text('Add Property_${tab}_takeoff')`).waitFor({ state: "visible" });
-            console.log(`✔ Button detected → Add Property_${tab}_takeoff`);
 
             console.log(`➡ Clicking Add Property_${tab}_takeoff`);
             await this.page.locator(`button:has-text('Add Property_${tab}_takeoff')`).click();
@@ -1054,7 +886,7 @@ class PropertiesHelper {
             // ===================== INTERIOR =====================
             if (tab === 'interior') {
 
-                console.log("\n🔵 INTERIOR TAKEOFF SELECTED");
+                console.log("\n INTERIOR TAKEOFF SELECTED");
 
                 console.log("⏳ Selecting Floorplan...");
                 await this.page.locator('.ag-floating-top div[col-id="floorplan_id"]').waitFor({ state: "visible" });
@@ -1126,55 +958,19 @@ class PropertiesHelper {
                 console.log("🎉 Exterior Takeoff validated successfully!");
             }
 
-            console.log("\n===============================");
-            console.log("✨ addPropertyTakeOff() SUCCESS");
-            console.log("===============================\n");
+            console.log("addPropertyTakeOff SUCCESS");
 
         } catch (error) {
-            console.log("\n❌ ERROR in addPropertyTakeOff()");
-            console.log("📌 Tab:", tab);
-            console.log("💥 Message:", error.message);
-            console.log("📜 Stack:", error.stack);
+            console.log("\n ERROR in addPropertyTakeOff()");
+            console.log("Tab:", tab);
+            console.log("Message:", error.message);
+            console.log("Stack:", error.stack);
             throw error;
         }
     }
 
-
-    // async addColumnTakeOff(tab) {
-
-    //     await this.page.locator(".lucide-plus:visible").waitFor({ state: "visible" });
-    //     await this.page.locator(".lucide-plus:visible").click();
-
-    //     await this.page.locator(`button:has-text('Add Data')`).waitFor({ state: "visible" });
-    //     await this.page.locator(`button:has-text('Add Data')`).click();
-
-    //     // column
-    //     let columnName = `columnName${Date.now()}`;
-    //     await this.page.locator(`.mantine-Paper-root p:has-text('Add column')`).waitFor({ state: "visible" });
-    //     await this.page.locator(`input[placeholder="Enter column name (letters, numbers, spaces, hyphens only)"]`).fill(columnName);
-    //     await this.page.locator(`input[placeholder="Enter column description (required)"]`).fill(columnName);
-    //     await this.page.locator(`button:has-text('Text')`).click();
-    //     await this.page.locator(`button:has-text('Add column')`).click();
-
-    //     await this.page.waitForLoadState("networkidle");
-    //     await this.page.waitForTimeout(3000);
-    //     // await this.page.locator(`p:has-text('${columnName}')`).waitFor({ state: "visible" });
-    //     // await expect.soft(this.page.locator(`p:has-text('${columnName}')`)).toBeVisible();
-
-    //     // Column Assertions in Settings icon
-    //     await this.page.locator(`.lucide.lucide-settings:visible`).waitFor({ state: "visible" });
-    //     await this.page.locator(`.lucide.lucide-settings:visible`).click();
-    //     await this.page.locator(`header:has-text('Manage Columns')`).waitFor({ state: "visible" });
-    //     await expect.soft(this.page.locator(`p:has-text('${columnName}')`).nth(0)).toBeVisible();
-
-    //     await this.page.locator(`.mantine-CloseButton-root:visible`).nth(0).waitFor({ state: "visible" });
-    //     await this.page.locator(`.mantine-CloseButton-root:visible`).nth(0).click();
-    // }
-
     async addColumnTakeOff(tab) {
-        console.log("\n=================================================");
-        console.log(`🚀 START: addColumnTakeOff('${tab}')`);
-        console.log("=================================================\n");
+        console.log(`START: addColumnTakeOff('${tab}')`);
 
         try {
             console.log("⏳ Step 1 → Waiting for [+] button...");
@@ -1371,7 +1167,7 @@ class PropertiesHelper {
         await expect(takeoffsTab).toBeVisible();
         await takeoffsTab.click();
         await expect(takeoffsTab).toHaveAttribute('data-active', 'true');
-        console.log("✔ Takeoffs tab opened");
+        console.log("Takeoffs tab opened");
     }
     async interiorANDexteriorTab() {
         // Selectors for tabs
@@ -1380,9 +1176,9 @@ class PropertiesHelper {
 
         // Assert both tabs are visible
         await expect(interiorTab).toBeVisible();
-        console.log("✔ Interior tab is visible");
+        console.log("Interior tab is visible");
         await expect(exteriorTab).toBeVisible();
-        console.log("✔ Exterior tab is visible");
+        console.log("Exterior tab is visible");
 
         // Assert Interior is selected
         await expect(interiorTab).toHaveAttribute('aria-selected', 'true');
