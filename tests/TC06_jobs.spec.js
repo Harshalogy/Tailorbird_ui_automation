@@ -119,8 +119,7 @@ test.describe('Verify Create Project and Add Job flow', () => {
         console.log("✔ Job Overview and Edit button are visible and edit button is enabled");
     });
 
-    test.only('User should be able to create bids and invite existing vendor', async () => {
-        await page.goto('https://beta.tailorbird.com/jobs/1529?propertyId=727&tab=summary');
+    test('User should be able to create bids and invite existing vendor', async () => {
         Logger.step('Creating Bid with Material...');
         await projectJob.createBidWithMaterial();
 
