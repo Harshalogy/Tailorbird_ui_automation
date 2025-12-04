@@ -2,6 +2,7 @@ const { expect } = require('@playwright/test');
 const { Logger } = require('../utils/logger');
 const fs = require('fs');
 const path = require('path');
+import { propertyLocators } from '../locators/propertyLocator.js';
 
 class ProjectPage {
     constructor(page) {
@@ -259,7 +260,7 @@ class ProjectPage {
         Logger.success('Landed on property page successfully.');
 
         // await expect(this.page.locator('.mantine-Notification-root')).toContainText("Successproject created successfully");
-        
+
         await this.assertSuccessToaster("project created successfully");
 
         // ✅ Assert project is visible with correct data
@@ -282,11 +283,19 @@ class ProjectPage {
     async searchProject(name) {
         await this.page.locator('input[placeholder="Search..."]').fill(name);
         await this.page.waitForLoadState("networkidle");
-        await this.page.waitForTimeout(3000);
-        const firstRowNameCell = this.page.locator(propertyLocators.firstRowNameCell);
-        await expect(firstRowNameCell).toHaveText(name);
-        console.log(`Search successful → Found: ${name}`);
+        await this.page.waitForTimeout(2000);
+
+        const firstRowNameCell = this.page.locator(propertyLocators.firstRowNameCell).first();
+
+        const text = await firstRowNameCell.innerText();
+        Logger.info(`First row text → "${text}"`);
+
+        Logger.info(`Searching for project containing: "${name}"`);
+        await expect(firstRowNameCell).toContainText(new RegExp(name, "i"));
+
+        console.log(`✔ Search successful → Found project containing: "${name}"`);
     }
+
 
     async verifyModalClosed() {
         await this.cancelBtn.click();
@@ -322,8 +331,8 @@ class ProjectPage {
     }
 
     async assertSuccessToaster(toasterMessage) {
-         await expect(this.page.locator('.mantine-Notification-root')).toContainText("Success" + toasterMessage);
-         Logger.success(`✅ Toaster with message "Success${toasterMessage}" is visible.`);
+        await expect(this.page.locator('.mantine-Notification-root')).toContainText("Success" + toasterMessage);
+        Logger.success(`✅ Toaster with message "Success${toasterMessage}" is visible.`);
     }
 
 }

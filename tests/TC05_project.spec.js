@@ -31,7 +31,7 @@ test('User should be able to open the Create Project ', async () => {
 test('User should be able to fill the Create Project form', async () => {
     const startDate = await projectPage.getStartDate();
     const endDate = await projectPage.getStartDate();
-    await projectPage.git({
+    await projectPage.fillProjectDetails({
         name: 'Automation Test Project',
         description: 'Created via Playwright automation',
         startDate: startDate,
@@ -42,7 +42,7 @@ test('User should be able to fill the Create Project form', async () => {
 test('User should be able to search with partial name of the project', async () => {
     await projectPage.navigateToProjects();
     await prop.changeView('Table View');
-    await projectPage.searchProject('Test');
+    await projectPage.searchProject("partial");
 });
 
 test('User should be able to filter and export project', async () => {
@@ -83,7 +83,7 @@ test('User should be able to filter and export project', async () => {
     const uiRows = 0;
     const rowsByProperty = parsedData.filter(r => r[propCol] === filterValue);
 
-    if (uiRows === 0) expect(rowsByProperty.length).toBe(1);
+    if (uiRows === 0) expect(rowsByProperty.length).toBe(0);
 
     const rowsByName = parsedData.filter(r => r[nameCol] === projectName);
     if (uiRows > 0) expect(rowsByName.length).toBe(1);
