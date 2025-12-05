@@ -42,7 +42,7 @@ test('User should be able to fill the Create Project form', async () => {
 test('User should be able to search with partial name of the project', async () => {
     await projectPage.navigateToProjects();
     await prop.changeView('Table View');
-    await projectPage.searchProject("partial");
+    await projectPage.searchProject("Test");
 });
 
 test('User should be able to filter and export project', async () => {
