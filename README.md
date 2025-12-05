@@ -64,7 +64,8 @@ if (Test-Path "Tailorbird_ui_automation") { Remove-Item -Recurse -Force "Tailorb
 IF EXIST "Tailorbird_ui_automation" (rmdir /s /q "Tailorbird_ui_automation") && git clone https://github.com/Harshalogy/Tailorbird_ui_automation.git && cd Tailorbird_ui_automation && npm install && npx playwright install chromium && npx playwright test --headed && npx playwright show-report
 ```
 ## 🟠 If Node.js is also not install, run this command
-```bashcommand -v node >/dev/null 2>&1 || { echo "Node.js not found. Installing..."; sudo apt update && sudo apt install -y nodejs npm; }; [ -d "Tailorbird_ui_automation" ] && rm -rf Tailorbird_ui_automation; git clone https://github.com/Harshalogy/Tailorbird_ui_automation.git && cd Tailorbird_ui_automation && npm install && npx playwright install chromium && npx playwright test --headed && npx playwright show-report
+```bash
+command -v node >/dev/null 2>&1 || { echo "Node.js not found. Installing..."; sudo apt update && sudo apt install -y nodejs npm; }; [ -d "Tailorbird_ui_automation" ] && rm -rf Tailorbird_ui_automation; git clone https://github.com/Harshalogy/Tailorbird_ui_automation.git && cd Tailorbird_ui_automation && npm install && npx playwright install chromium && npx playwright test --headed && npx playwright show-report
 ```
 
 
