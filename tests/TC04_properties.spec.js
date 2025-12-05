@@ -161,7 +161,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
   });
 
   test("@sanity TC09 - Validate Location Tab", async () => {
-    const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property)';
+    const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property 1)';
     console.log(`🔎 Using property name: ${propertyName}`);
     await prop.changeView('Table View');
     console.log("✔ Changed to Table View");
@@ -193,7 +193,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
 
     await prop.goto(data.dashboardUrl);
     await prop.goToProperties();
-    const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property)';
+    const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property 1)';
     console.log(`🔎 Using property name: ${propertyName}`);
     await prop.changeView('Table View');
     await prop.searchProperty(propertyName);
@@ -217,7 +217,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
 
     await prop.goto(data.dashboardUrl);
     await prop.goToProperties();
-    const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property)';
+    const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property 1)';
     console.log(`🔎 Using property name: ${propertyName}`);
     await prop.changeView('Table View');
     await prop.searchProperty(propertyName);
@@ -268,7 +268,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     }
 
     await safe("Changing table view", async () => await prop.changeView("Table View"))
-    await safe("Searching property", async () => await prop.searchProperty("Harbor Bay at MacDill 01_Liberty Cove (Sample Property 01)"))
+    await safe("Searching property", async () => await prop.searchProperty("Harbor Bay at MacDill_Liberty Cove (Sample Property 1)"))
     await safe("Opening View Details", async () => await page.locator('button[title="View Details"]').first().click({ force: true }))
     await safe("Opening Asset Viewer", async () => await page.locator('button:has-text("Asset Viewer")').click({ force: true }))
 
@@ -429,7 +429,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await prop.goto(data.dashboardUrl);
     await prop.goToProperties();
     await prop.changeView('Table View');
-    const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property)';
+    const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property 1)';
     console.log(`Using property name: ${propertyName}`);
 
     // Change view & search property

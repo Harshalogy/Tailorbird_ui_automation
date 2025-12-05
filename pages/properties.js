@@ -906,12 +906,12 @@ class PropertiesHelper {
                 await qtyCell.dblclick();
                 console.log("✔ unit_mix_quantity cell activated for editing");
 
-                await qtyCell.locator('input').fill('100');
+                await qtyCell.locator('input').fill('100',{delay:50});
                 await qtyCell.locator('input').press('Enter');
                 console.log("✔ Quantity set → 100");
 
                 await this.page.waitForLoadState("networkidle");
-                await this.page.waitForTimeout(3000);
+                await this.page.waitForTimeout(5000);
 
                 const val = await this.page.locator('div[row-index="0"] div[col-id="count"]').textContent();
                 console.log(`📌 Count cell value read → "${val?.trim()}"`);
@@ -949,7 +949,7 @@ class PropertiesHelper {
                 console.log("✔ Quantity set → 100");
 
                 await this.page.waitForLoadState("networkidle");
-                await this.page.waitForTimeout(3000);
+                await this.page.waitForTimeout(5000);
 
                 const val = await this.page.locator('div[row-index="0"] div[col-id="count"]').textContent();
                 console.log(`📌 Count cell value read → "${val?.trim()}"`);
