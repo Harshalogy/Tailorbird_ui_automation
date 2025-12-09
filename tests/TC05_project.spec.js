@@ -19,16 +19,16 @@ test.beforeAll(async ({ browser }) => {
     await page.waitForLoadState('networkidle');
 });
 
-test('User should be able to navigate to Projects tab', async () => {
+test('TC01 : Navigate to Projects & Jobs and verify page loads successfully within 2 seconds and zero console error', async () => {
     await projectPage.navigateToProjects();
 });
 
-test('User should be able to open the Create Project ', async () => {
+test('TC02 : User should be able to Open Create Project modal and verify all fields are visible', async () => {
     await projectPage.openCreateProjectModal();
     await projectPage.verifyModalFields();
 });
 
-test('User should be able to fill the Create Project form', async () => {
+test('TC03 : User should be able to Fill Create Project form, submit, and verify project details on dashboard', async () => {
     const startDate = await projectPage.getStartDate();
     const endDate = await projectPage.getStartDate();
     await projectPage.fillProjectDetails({
@@ -39,13 +39,13 @@ test('User should be able to fill the Create Project form', async () => {
     });
 });
 
-test('User should be able to search with partial name of the project', async () => {
+test('TC04 : User should be able to search project using partial name and verify matching results', async () => {
     await projectPage.navigateToProjects();
     await prop.changeView('Table View');
     await projectPage.searchProject("Test");
 });
 
-test('User should be able to filter and export project', async () => {
+test('TC05 : User should be able to apply filter and export project', async () => {
     await projectPage.navigateToProjects();
     await prop.changeView('Table View');
 
@@ -93,14 +93,14 @@ test('User should be able to filter and export project', async () => {
     await page.locator(loc.deleteConfirmBtn).click();
 });
 
-test('Validate cancel button closes without saving.', async () => {
+test('TC06 : Validate cancel button closes without saving.', async () => {
     await projectPage.navigateToProjects();
     await prop.changeView('Table View');
     await projectPage.openCreateProjectModal();
     await projectPage.verifyModalClosed();
 });
 
-test('Validate Create Project form mandatory fields assertion', async () => {
+test('TC07 : Validate Create Project form mandatory fields assertion, property dropdown options and date can be filled directly without using calender', async () => {
     await projectPage.navigateToProjects();
     await projectPage.openCreateProjectModal();
     await projectPage.validateMandatoryFields();

@@ -335,6 +335,21 @@ class ProjectPage {
         Logger.success(`✅ Toaster with message "Success${toasterMessage}" is visible.`);
     }
 
+    async openProject(projectName) {
+        Logger.step(`Opening project: "${projectName}" from the list...`);
+        await this.navigateToProjects();
+        const searchProject = this.page.locator('input[placeholder="Search..."]');
+        await searchProject.waitFor({ state: 'visible', timeout: 30000 });
+        await searchProject.click();
+        await searchProject.fill(projectName);
+        //await page.waitForSelector('input[placeholder="Search..."]', { state: 'visible', timeout: 30000 });
+        const projectCard = this.page.locator('.mantine-SimpleGrid-root .mantine-Group-root', {
+            hasText: projectName,
+        });
+        await projectCard.waitFor({ state: 'visible', timeout: 10000 });
+        await projectCard.click();
+    }
+
 }
 
 module.exports = { ProjectPage };
