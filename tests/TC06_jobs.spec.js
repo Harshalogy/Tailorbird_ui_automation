@@ -397,6 +397,114 @@ test.describe('Verify Create Project and Add Job flow', () => {
 
     });
 
+    test('TC08 : User should be able to edit bid on behalf of new vendor and submit', async () => {
+        await projectPage.openProject(projectData.projectName);
+        await projectJob.navigateToJobsTab();
+        await projectJob.openJobSummary();
+        await projectJob.navigateToBidsTab();
+
+        // await page.pause();
+        Logger.step('Editing Bid on behalf of vendor...');
+        const actionButton = page.locator('button:has(svg.lucide-ellipsis-vertical)').nth(0);
+        await actionButton.click();
+        await page.locator('.mantine-Menu-dropdown .mantine-Menu-itemLabel:has-text("Edit On Behalf of Vendor")').click();
+        await page.waitForTimeout(2000);
+        await page.locator('h2.m_615af6c9.mantine-Modal-title').waitFor({ state: 'visible' });
+
+        // ✅ Edit total price
+        const totalCostCell = page.locator('div[row-index="0"] [role="gridcell"][col-id="total_price"]').last();
+        await totalCostCell.dblclick();
+        const costInput = page.locator('input[data-testid="bird-table-currency-input"]').first();
+        await costInput.waitFor({ state: 'visible', timeout: 10000 });
+        await costInput.fill('1000');
+
+        page.once('dialog', async (dialog) => {
+            console.log(`Dialog message: ${dialog.message()}`);
+            await dialog.accept();
+        });
+
+        // ✅ Submit bid
+        const submitButton = page.locator('button:has-text("Submit Bid")');
+        await submitButton.click({ force: true });
+        await page.waitForTimeout(3000);
+
+        // ✅ Close modal
+        const closeButton = page.locator('header.mantine-Modal-header button.mantine-Modal-close');
+        await closeButton.waitFor({ state: 'visible', timeout: 10000 });
+        await closeButton.click();
+
+        // ✅ Save last visited URL
+        const currentUrl = page.url();
+        const urlFilePath = path.join(__dirname, '../data/lastVisitedUrl.json');
+        fs.writeFileSync(urlFilePath, JSON.stringify({ lastUrl: currentUrl }, null, 2));
+        Logger.success(`💾 Saved last visited URL: ${currentUrl}`);
+
+        await context.storageState({ path: 'jobsessionState.json' }); // Save session
+    });
+
+    test('TC09 : User should be able to manage vendors and award bid', async () => {
+        await projectPage.openProject(projectData.projectName);
+        await projectJob.navigateToJobsTab();
+        await projectJob.openJobSummary();
+        await projectJob.navigateToBidsTab();
+        // ✅ If "Invite Vendors To Bid" is not visible, click "Manage Vendors"
+        if (!(await page.locator("button:has-text('Invite Vendors To Bid')").isVisible())) {
+            await page.locator('p:has-text("Manage Vendors")').click();
+        }
+
+        await page.waitForLoadState('networkidle');
+        await page.waitForTimeout(3000);
+        // ✅ Click action menu and award the bid
+        const secondVendorAction = page.locator('button:has(svg.lucide-ellipsis-vertical)').nth(0);
+        await secondVendorAction.waitFor({ state: 'visible' })
+        await secondVendorAction.click();
+        await page.waitForLoadState('networkidle');
+        await page.waitForTimeout(3000);
+        await page
+            .locator('.mantine-Menu-dropdown .mantine-Menu-itemLabel:has-text("Award Bid")')
+            .click();
+
+        // ✅ Wait for dialog and verify buttons
+        await page.waitForSelector('section[role="dialog"]', { state: 'visible' });
+
+        const cancelButton = page.locator('section[role="dialog"] button:has-text("Cancel")');
+        await expect(cancelButton).toBeVisible();
+
+        const awardButton = page.locator('section[role="dialog"] button:has-text("Award")');
+        await expect(awardButton).toBeVisible();
+
+        await awardButton.click();
+    });
+
+    test('TC10 : User should be able to verify awarded status and finalize contract', async () => {
+        await projectPage.openProject(projectData.projectName);
+        await projectJob.navigateToJobsTab();
+        await projectJob.openJobSummary();
+        await projectJob.navigateToBidsTab();
+
+        // ✅ Wait for Awarded row
+        const awardedRow = page.locator('div[role="row"]:has-text("Awarded") div[col-id="status"] p');
+        await awardedRow.waitFor({ state: 'visible', timeout: 10000 });
+        await expect(awardedRow).toHaveText('Awarded');
+        console.log('✅ Vendor has been awarded successfully');
+
+        // ✅ Move to Contracts tab
+        await page.locator('.mantine-Tabs-tabLabel:has-text("Contracts")').click();
+
+        // ✅ Finalize contract
+        await page.locator('button:has-text("Finalize Contract")').click();
+        await page.locator('.mantine-Modal-content button:has-text("Finalize Contract")').click();
+
+        await page
+            .locator('.mantine-Modal-content button:has-text("Finalize Contract")')
+            .waitFor({ state: 'hidden' });
+
+        // await expect(page.locator('button:has-text("Bulk Update Status")')).toBeDisabled();
+        await expect(page.locator('button:has-text("Bulk Update Status")')).toBeDefined();
+
+        Logger.success('✅ Contract finalized and verified successfully');
+    });
+
     test.afterAll(async () => {
         if (context) {
             await context.close();

@@ -12,7 +12,7 @@ exports.ProjectJob = class ProjectJob {
 
             // Buttons
             addJobMenu: this.page.getByRole('tabpanel', { name: 'Jobs' }).getByTestId('bt-add-row-menu'),
-            viewDetailsButton: this.page.locator('button[title="View Details"]').first(),
+            viewDetailsButton: this.page.locator('button[title="View Details"]').last(),
             deleteButton: this.page.locator('button[aria-label="Delete Row"]').first(),
             inviteVendorsToBidButton: this.page.locator("button:has-text('Invite Vendors To Bid')"),
 
