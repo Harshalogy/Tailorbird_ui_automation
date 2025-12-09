@@ -326,7 +326,7 @@ exports.ProjectJob = class ProjectJob {
         await saveBtn.click();
 
         Logger.step('Waiting for Save Template success notification...');
-        const notif2 = this.page.locator('.mantine-Notification-root');
+        const notif2 = this.page.locator('.mantine-Notification-root').nth(0);
         await expect(notif2).toBeVisible({ timeout: 15000 });
         await expect(notif2).toContainText('Template Saved');
         await expect(notif2).toContainText('has been saved successfully');
