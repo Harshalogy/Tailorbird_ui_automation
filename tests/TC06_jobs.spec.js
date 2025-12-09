@@ -43,7 +43,7 @@ test.describe('Verify Create Project and Add Job flow', () => {
         });
     });
 
-    test('TC01 @regression : Validate Navigation to job tab without any console error within 2 minutes', async () => {
+    test('TC01 @regression : Validate Navigation to job tab without any console error within 2 seconds', async () => {
         Logger.step('Navigating to Projects...');
         await projectPage.navigateToProjects();
         await projectPage.openProject(projectData.projectName);
@@ -151,7 +151,7 @@ test.describe('Verify Create Project and Add Job flow', () => {
         await projectJob.verifyBidTemplate();
     });
 
-    test.skip('TC05 @regression : Validate update bid flow', async () => {
+    test('TC05 @regression : Validate update bid flow', async () => {
         await projectPage.openProject(projectData.projectName);
         await projectJob.navigateToJobsTab();
         await projectJob.openJobSummary();
@@ -211,6 +211,9 @@ test.describe('Verify Create Project and Add Job flow', () => {
         // 8. Confirm modal disappears
         await expect(modal).toBeHidden();
         console.log("Modal closed after Reset Table");
+
+        const rowCount = await page.locator('div[role="row"][row-index="t-0"]').count();
+        expect(rowCount).toBeLessThanOrEqual(2);
 
     });
 

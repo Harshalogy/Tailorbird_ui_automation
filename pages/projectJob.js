@@ -234,6 +234,12 @@ exports.ProjectJob = class ProjectJob {
         await this.locators.bidsTab.click();
         await this.page.waitForLoadState('networkidle');
         await this.page.waitForTimeout(3000);
+        if ((await this.locators.inviteVendorsToBidButton.isVisible())) {
+            await this.page.locator('p:has-text("Manage Vendors")').click();
+            await this.page.waitForTimeout(2000);
+            Logger.success('✅ Manage Vendors pane minimized.');
+        }
+
 
         Logger.step('Verifying bid template...');
         await this.page.locator('button:has(svg.lucide-file-text)').nth(2).click();
@@ -260,23 +266,38 @@ exports.ProjectJob = class ProjectJob {
         const applyTitle = applyDialog.locator('h2');
         const applyMessage = applyDialog.locator('p');
         const applyCancel = applyDialog.locator('button:has-text("Cancel")');
-        const applyApply = applyDialog.locator('button:has-text("Apply Template")');
+        const applyTemplate = applyDialog.locator('button:has-text("Apply Template")');
 
         Logger.step(`Dialog Title: ${await applyTitle.textContent()}`);
         Logger.step(`Dialog Message: ${await applyMessage.textContent()}`);
         Logger.step('Checking Cancel button...');
         await expect(applyCancel).toBeVisible();
         Logger.step('Checking Apply Template button...');
-        await expect(applyApply).toBeVisible();
+        await expect(applyTemplate).toBeVisible();
+
+        // Get value before
+        const before = await this.page.locator('.ag-center-cols-container:visible').innerText();
 
         Logger.step('Clicking Apply Template...');
-        await applyApply.click();
+        await applyTemplate.waitFor({ state: 'visible' });
+        await applyTemplate.click();
+        await applyTemplate.waitFor({ state: 'hidden' });
 
         Logger.step('Waiting for Template Applied notification...');
         const notif1 = this.page.locator('.mantine-Notification-root');
         await expect(notif1).toBeVisible({ timeout: 15000 });
         await expect(notif1).toContainText('Template Applied');
         await expect(notif1).toContainText('has been applied successfully');
+
+        // Get value after
+        const after = await this.page.locator('.ag-center-cols-container:visible').innerText()
+
+        console.log(`Before Template Apply:\n${before}`);
+        console.log(`After Template Apply:\n${after}`);
+        // Assert change
+        await this.page.waitForLoadState('networkidle');
+        await this.page.waitForTimeout(5000);
+        expect(after).not.toBe(before);
 
         Logger.step('Re-opening bid template menu...');
         await this.page.locator('button:has(svg.lucide-file-text)').nth(2).click();
@@ -475,7 +496,7 @@ exports.ProjectJob = class ProjectJob {
                     updatedValue = "UpdatedValue_" + Math.floor(Math.random() * 900 + 100);
                     break;
                 case 4:
-                    updatedValue = "110"; 
+                    updatedValue = "110";
                     break;
                 default:
                     updatedValue = "Updated_" + (i + 1);
@@ -538,6 +559,7 @@ exports.ProjectJob = class ProjectJob {
         await this.page.waitForTimeout(5000);
         Logger.success('✅ Created Bid with Material.');
 
+        await this.page.pause();
         // --- Fill Quantity column ---
         Logger.step("Filling Quantity column with 100...");
         const quantityCell = this.page.locator('div[row-index="0"] div[col-id="quantity"]').first();
