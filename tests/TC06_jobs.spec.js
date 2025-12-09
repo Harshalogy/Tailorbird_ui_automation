@@ -43,7 +43,7 @@ test.describe('Verify Create Project and Add Job flow', () => {
         });
     });
 
-    test('TC01 : User should be able to navigate to job tab without any error', async () => {
+    test('TC01 @regression : Validate Navigation to job tab without any console error within 2 minutes', async () => {
         Logger.step('Navigating to Projects...');
         await projectPage.navigateToProjects();
         await projectPage.openProject(projectData.projectName);
@@ -56,7 +56,7 @@ test.describe('Verify Create Project and Add Job flow', () => {
         await projectJob.navigateToJobsTab();
     });
 
-    test('TC02 : User should be able to add and job details ', async () => {
+    test('TC02 @regression : Validate add job modal fields, add job flow and job config in job overview', async () => {
         Logger.step('Adding and editing Job...');
         const createJob = page.locator('button', { hasText: 'Create Job' });
         await expect(createJob).toBeVisible();
@@ -124,7 +124,7 @@ test.describe('Verify Create Project and Add Job flow', () => {
         console.log("✔ Job Overview and Edit button are visible and edit button is enabled");
     });
 
-    test('TC03 : User should be able to create bids and invite existing vendor', async () => {
+    test('TC03 @regression : User should be able to create bids and invite existing vendor', async () => {
         Logger.step('Creating Bid with Material...');
         await projectJob.createBidWithMaterial();
 
@@ -143,7 +143,7 @@ test.describe('Verify Create Project and Add Job flow', () => {
 
     });
 
-    test('TC04 : User should be able to set bid template and save it', async () => {
+    test('TC04 @regression : Validate set bid template fucntionality and save it', async () => {
         await projectPage.openProject(projectData.projectName);
         await projectJob.navigateToJobsTab();
         await projectJob.openJobSummary();
@@ -151,7 +151,7 @@ test.describe('Verify Create Project and Add Job flow', () => {
         await projectJob.verifyBidTemplate();
     });
 
-    test.skip('TC05 : User should be able to update bid', async () => {
+    test.skip('TC05 @regression : Validate update bid flow', async () => {
         await projectPage.openProject(projectData.projectName);
         await projectJob.navigateToJobsTab();
         await projectJob.openJobSummary();
@@ -162,7 +162,7 @@ test.describe('Verify Create Project and Add Job flow', () => {
         await projectJob.validateAndUpdateFirstRow();
     });
 
-    test('TC06 : User should be able to reset table', async () => {
+    test('TC06 @regression : Validate reset table modal and its functionality', async () => {
         await projectPage.openProject(projectData.projectName);
         await projectJob.navigateToJobsTab();
         await projectJob.openJobSummary();
@@ -214,7 +214,7 @@ test.describe('Verify Create Project and Add Job flow', () => {
 
     });
 
-    test('TC07 : Validate scope mix modal fields', async () => {
+    test('TC07 @regression : Validate scope mix modal fields', async () => {
 
         await projectPage.openProject('Automation_project_for_scope_mix');
         await projectJob.navigateToJobsTab();
@@ -397,7 +397,7 @@ test.describe('Verify Create Project and Add Job flow', () => {
 
     });
 
-    test('TC08 : User should be able to edit bid on behalf of new vendor and submit', async () => {
+    test('TC08 @regression : Validate edit bid on behalf of new vendor flow and submit it successfully', async () => {
         await projectPage.openProject(projectData.projectName);
         await projectJob.navigateToJobsTab();
         await projectJob.openJobSummary();
@@ -442,7 +442,7 @@ test.describe('Verify Create Project and Add Job flow', () => {
         await context.storageState({ path: 'jobsessionState.json' }); // Save session
     });
 
-    test('TC09 : User should be able to manage vendors and award bid', async () => {
+    test('TC09 @regression : User should be able to manage vendors and award bid', async () => {
         await projectPage.openProject(projectData.projectName);
         await projectJob.navigateToJobsTab();
         await projectJob.openJobSummary();
@@ -476,7 +476,7 @@ test.describe('Verify Create Project and Add Job flow', () => {
         await awardButton.click();
     });
 
-    test('TC10 : User should be able to verify awarded status and finalize contract', async () => {
+    test('TC10 @regression : User should be able to verify awarded status and finalize contract', async () => {
         await projectPage.openProject(projectData.projectName);
         await projectJob.navigateToJobsTab();
         await projectJob.openJobSummary();
