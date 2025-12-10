@@ -225,7 +225,9 @@ class PropertiesHelper {
         await this.page.locator(propertyLocators.rowDeleteIcon(rowIndex)).click();
         await this.page.locator(propertyLocators.deleteButtonInPopover).waitFor({ state: "visible" });
         await this.page.locator(propertyLocators.deleteButtonInPopover).click();
-        await this.page.locator(`.ag-center-cols-container p[title="${name}"]`).first().waitFor({ state: "hidden" });
+        await this.page.waitForLoadState("networkidle");
+        await this.page.waitForTimeout(1000);
+        // await this.page.locator(`.ag-center-cols-container p[title="${name}"]`).first().waitFor({ state: "hidden" });
         await expect(this.page.locator(`.ag-center-cols-container p[title="${name}"]`)).not.toBeVisible();
         console.log(`Property: ${name} is Deleted.`);
     }

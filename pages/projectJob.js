@@ -601,4 +601,14 @@ exports.ProjectJob = class ProjectJob {
         Logger.success('✅ Navigated to Bids tab.');
     }
 
+     async minimizeManageVendors() {
+        Logger.step('Minimizing Manage Vendors pane...');
+        if (!(await this.locators.inviteVendorsToBidButton.isVisible())) {
+            await this.page.locator('p:has-text("Manage Vendors")').click();
+            await this.page.waitForTimeout(2000);
+            Logger.success('✅ Manage Vendors pane minimized.');
+        }
+
+    };
+
 };

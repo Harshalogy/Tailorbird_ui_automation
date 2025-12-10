@@ -422,6 +422,8 @@ test.describe('Verify Create Project and Add Job flow', () => {
         await projectJob.openJobSummary();
         await projectJob.navigateToBidsTab();
 
+        await projectJob.minimizeManageVendors();
+
         // await page.pause();
         Logger.step('Editing Bid on behalf of vendor...');
         const actionButton = page.locator('button:has(svg.lucide-ellipsis-vertical)').nth(0);
