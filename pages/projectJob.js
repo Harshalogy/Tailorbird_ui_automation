@@ -559,7 +559,7 @@ exports.ProjectJob = class ProjectJob {
         await this.page.waitForTimeout(5000);
         Logger.success('✅ Created Bid with Material.');
 
-        await this.page.pause();
+        // await this.page.pause();
         // --- Fill Quantity column ---
         Logger.step("Filling Quantity column with 100...");
         const quantityCell = this.page.locator('div[row-index="0"] div[col-id="quantity"]').first();

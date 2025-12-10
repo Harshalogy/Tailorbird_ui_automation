@@ -143,6 +143,22 @@ test.describe('Verify Create Project and Add Job flow', () => {
 
     });
 
+    test.skip('User should be able to invite new vendor', async () => {
+        // ✅ Invite new vendor
+        Logger.step('Inviting new vendor...');
+        await page.locator("button:has-text('Invite Vendors To Bid')").click();
+        await page.locator(`button:has-text('Invite a New Vendor to Bid')`).click();
+        await page.locator(`input[placeholder="Enter Vendor Organization Name"]`).fill('Sumit_Corp');
+        await page.locator(`input[placeholder="Enter Contact Name"]`).fill('Sumit');
+        await page.locator(`input[placeholder="Enter Contact Email"]`).fill(projectPage.generateRandomEmail());
+        await page.locator(`input[placeholder="Search for address..."]`).fill('Noida');
+        await page.waitForTimeout(3000);
+        await page.locator(`.mantine-Stack-root:has-text('Invite a New Vendor to Bid') button:has-text('Invite Vendor')`).click();
+        await page.waitForLoadState('networkidle');
+        await expect(page.locator(`div[col-id="vendor_name"]:has-text('Sumit_Corp')`)).toBeVisible();
+        Logger.success('✅ New vendor invited successfully.');
+    });
+
     test('TC04 @regression : Validate set bid template fucntionality and save it', async () => {
         await projectPage.openProject(projectData.projectName);
         await projectJob.navigateToJobsTab();
@@ -443,6 +459,35 @@ test.describe('Verify Create Project and Add Job flow', () => {
         Logger.success(`💾 Saved last visited URL: ${currentUrl}`);
 
         await context.storageState({ path: 'jobsessionState.json' }); // Save session
+    });
+
+    test('User should be able to open Bids tab and verify bid leveling table', async () => {
+
+        await projectPage.openProject(projectData.projectName);
+        await projectJob.navigateToJobsTab();
+        await projectJob.openJobSummary();
+        await projectJob.navigateToBidsTab();
+        await page.waitForTimeout(3000);
+
+        // ✅ Navigate to Bids tab
+        await page.locator('.mantine-Tabs-tabLabel:has-text("Bids")').click();
+        //await expect(page).toHaveURL(/\/jobs\/\d+\?tab=bids&propertyId=\d+/);
+        console.log('✅ Navigated to Bids tab successfully');
+
+        // ✅ Click bid leveling button
+        await page.locator('button.mantine-ActionIcon-root:has(svg.lucide-scale)').click();
+        await page.waitForTimeout(3000);
+
+        const totalCost = page.locator('div[role="row"]:has-text("Total")');
+        await totalCost.waitFor({ state: 'visible', timeout: 10000 });
+
+        // Optional assertion (commented in your original)
+        // await expect(totalCost).toHaveText(/\b[1-9]\d*\b/);
+        await page.waitForTimeout(5000);
+        const bidRow = page.locator('div[role="row"]:has-text("Bid with material")').first();
+        await expect(bidRow).toContainText('$1,000');
+        const totalRow = page.locator('div[role="row"]:has-text("Total")');
+        await expect(totalRow).toContainText('Total$1,000');
     });
 
     test('TC09 @regression : User should be able to manage vendors and award bid', async () => {
