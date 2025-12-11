@@ -24,7 +24,7 @@ test.afterAll(async () => {
 
 test.describe('Tailorbird Left Panel Flow - Modular', () => {
 
-    test('@sanity Verify all menu options are available', async () => {
+    test('TC03 @sanity Verify all menu options are available', async () => {
         const actualLabels = await helper.getLeftPanelLabels(page);
 
         if (actualLabels.length === 0) throw new Error('Left panel labels not found.');
@@ -35,7 +35,7 @@ test.describe('Tailorbird Left Panel Flow - Modular', () => {
         }
     });
 
-    test('@sanity Verify all menu navigation', async () => {
+    test('TC04 @sanity Verify all menu navigation', async () => {
         const actualLabels = await helper.getLeftPanelLabels(page);
         expect(actualLabels.length).toBeGreaterThan(0);
 
@@ -62,7 +62,7 @@ test.describe('Tailorbird Left Panel Flow - Modular', () => {
         Logger.info("\n🎉 All Sidebar Menu Navigation Validated Successfully\n");
     });
 
-    test('@sanity Verify main menu toggle functionality', async () => {
+    test('TC05 @sanity Verify main menu toggle functionality', async () => {
         const toggleBtn = page.locator(locators.firstLeftPanelToggle).first();
         await expect(toggleBtn).toHaveCount(1);
 
@@ -80,15 +80,15 @@ test.describe('Tailorbird Left Panel Flow - Modular', () => {
         Logger.info('[After 2nd Click] aria-expanded = ' + after2);
     });
 
-    test.skip('@sanity Verify Financials expand/collapse', async () => {
+    test.skip('TC06 @sanity Verify Financials expand/collapse', async () => {
         await helper.runTwoClickTest(page, "Financials");
     });
 
-    test.skip('@sanity Verify Trackers expand/collapse', async () => {
+    test.skip('TC07 @sanity Verify Trackers expand/collapse', async () => {
         await helper.runTwoClickTest(page, "Trackers");
     });
 
-    test.skip('@sanity Verify Documents expand/collapse', async () => {
+    test.skip('TC08 @sanity Verify Documents expand/collapse', async () => {
         await helper.runTwoClickTest(page, "Documents");
     });
 

@@ -20,7 +20,7 @@ test.afterAll(async () => {
 
 test.describe('Manage Organization Flow ', () => {
 
-  test('@sanity TC01 - Invite new user to organization with Member role', async () => {
+  test('@sanity TC09 - Invite new user to organization with Member role', async () => {
     const email = `member_${Date.now()}@yopmail.com`;
     await org.inviteUser(email, 'Member');
     await org.search(email);
@@ -29,7 +29,7 @@ test.describe('Manage Organization Flow ', () => {
     expect(await org.visibleRowCount()).toBeGreaterThan(0);
   });
 
-  test('@sanity TC02 - Invite new user to organization with Admin role', async () => {
+  test('@sanity TC10 - Invite new user to organization with Admin role', async () => {
     const email = `admin_${Date.now()}@yopmail.com`;
     await org.inviteUser(email, 'Admin');
     await org.search(email);
@@ -38,7 +38,7 @@ test.describe('Manage Organization Flow ', () => {
     expect(await org.visibleRowCount()).toBeGreaterThan(0);
   });
 
-  test('@sanity TC03 - Revoke user invitation to organization', async () => {
+  test('@sanity TC11 - Revoke user invitation to organization', async () => {
     const email = `revoke_${Date.now()}@yopmail.com`;
     await org.inviteUser(email, 'Admin');
     await org.search(email);
@@ -48,7 +48,7 @@ test.describe('Manage Organization Flow ', () => {
     await org.verifyNoResults();
   });
 
-  test('@sanity TC04 - Resend user invitation to organization', async () => {
+  test('@sanity TC12 - Resend user invitation to organization', async () => {
     await org.goto(data.organizationUrl);
     const email = `revoke_${Date.now()}@yopmail.com`;
     await org.inviteUser(email, 'Admin');
@@ -59,7 +59,7 @@ test.describe('Manage Organization Flow ', () => {
     await org.verifyResendSuccess(email);
   });
 
-  test('@sanity TC05 - Edit user role to organization', async () => {
+  test('@sanity TC13 - Edit user role to organization', async () => {
     const email = 'tailorbird-admin@tailorbird.us';
     await org.search(email);
     const row = await org.getRow(email);

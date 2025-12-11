@@ -58,7 +58,7 @@ test.afterAll(async () => {
 
 test.describe('PROPERTY FLOW TEST SUITE', () => {
 
-  test('@sanity TC01 - Validate Property Export Functionality and New Property Creation', async () => {
+  test('@sanity TC14 - Validate Property Export Functionality and New Property Creation', async () => {
     await prop.exportButton();
     await prop.createProperty(name, address, city, state, zip, property_type);
 
@@ -74,14 +74,14 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     console.log(`Property data saved to: ${downloadPath}`);
   });
 
-  test('@sanity TC02 - Change Property View and Validate Search Results', async () => {
+  test('@sanity TC15 - Change Property View and Validate Search Results', async () => {
     const propertyName = getPropertyName();
     await prop.changeView(testData.viewName);
     await prop.searchProperty(propertyName);
     await prop.clearSearch("");
   });
 
-  test('@sanity TC03 - Validate Filters: Garden, Mid-Rise, High-Rise, and Military', async () => {
+  test('@sanity TC16 - Validate Filters: Garden, Mid-Rise, High-Rise, and Military', async () => {
     await prop.changeView(testData.viewName);
     await page.locator(".lucide.lucide-funnel").waitFor({ state: "visible" });
     await page.locator(".lucide.lucide-funnel").click();
@@ -93,7 +93,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await page.locator(".mantine-Paper-root .mantine-CloseButton-root").click();
   });
 
-  test('@sanity TC04 - Validate All Column Headers in Table View', async () => {
+  test('@sanity TC17 - Validate All Column Headers in Table View', async () => {
     await prop.changeView('Table View');
     for (let i = 0; i < testData.expectedHeaders.length; i++) {
       await prop.scrollHorizontally(i);
@@ -104,7 +104,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await prop.scrollBackToStart();
   });
 
-  test('@sanity TC05 - Validate Overview Fields and Property Document Actions', async () => {
+  test('@sanity TC18 - Validate Overview Fields and Property Document Actions', async () => {
     const propName = getPropertyName();
     const vals = {
       "Property Name": propName,
@@ -128,7 +128,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await prop.manageColumns(testData.manageColumns.expectedColumns);
   });
 
-  test('@sanity TC06 - Validate Document Section Table', async () => {
+  test('@sanity TC19 - Validate Document Section Table', async () => {
     await prop.goto(data.dashboardUrl);
     const propertyName = getPropertyName();
     await prop.goToProperties();
@@ -139,7 +139,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await prop.validateFirstRowValues();
   });
 
-  test('@sanity TC07 - validate add data form', async () => {
+  test('@sanity TC20 - validate add data form', async () => {
     await prop.goToProperties();
     const propertyName = getPropertyName();
     console.log('Using property name:', propertyName);
@@ -151,7 +151,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
 
   });
 
-  test('@sanity TC08 - Validate Delete Property', async () => {
+  test('@sanity TC21 - Validate Delete Property', async () => {
     await prop.goto(data.dashboardUrl);
     await prop.goToProperties();
     const propertyName = getPropertyName();
@@ -160,7 +160,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await prop.deleteProperty(propertyName);
   });
 
-  test("@sanity TC09 - Validate Location Tab", async () => {
+  test("@sanity TC22 - Validate Location Tab", async () => {
     const propertyName = 'Harbor Bay at MacDill_Liberty Cove (Sample Property 1)';
     console.log(`🔎 Using property name: ${propertyName}`);
     await prop.changeView('Table View');
@@ -189,7 +189,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
 
   });
 
-  test('@sanity TC10 - validate takeoffs Interior panel and dropdowns', async () => {
+  test('@sanity TC23 - validate takeoffs Interior panel and dropdowns', async () => {
 
     await prop.goto(data.dashboardUrl);
     await prop.goToProperties();
@@ -213,7 +213,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
 
   });
 
-  test('@sanity TC11 - validate takeoffs Exterior panel and dropdowns', async () => {
+  test('@sanity TC24 - validate takeoffs Exterior panel and dropdowns', async () => {
 
     await prop.goto(data.dashboardUrl);
     await prop.goToProperties();
@@ -235,7 +235,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await prop.addColumnTakeOff('exterior');
   });
 
-  test('@sanity TC12 – asset viewer', async () => {
+  test('@sanity TC25 – asset viewer', async () => {
     await prop.goto(data.dashboardUrl);
     await prop.goToProperties();
     test.setTimeout(900000)
@@ -397,7 +397,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
 
   });
 
-  test('@regression TC13 - Validate Filters: gibberish', async () => {
+  test('@regression TC26 - Validate Filters: gibberish', async () => {
     await prop.goToProperties();
     await prop.changeView('Table View');
     name = 'gibberish';
@@ -408,7 +408,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
 
   });
 
-  test('@regression TC14 - validate No models available in asset viewer tab', async () => {
+  test('@regression TC27 - validate No models available in asset viewer tab', async () => {
     const propertyName = "property_1764215595513";
     console.log('Using property name:', propertyName);
     await prop.changeView('Table View');
@@ -425,7 +425,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     await prop.iconAssertion()
   });
 
-  test("@sanity TC15 - Validate add Units rows inside Locations and no duplicate row added", async () => {
+  test("@sanity TC28 - Validate add Units rows inside Locations and no duplicate row added", async () => {
     await prop.goto(data.dashboardUrl);
     await prop.goToProperties();
     await prop.changeView('Table View');
