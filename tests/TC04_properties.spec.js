@@ -268,7 +268,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
     }
 
     await safe("Changing table view", async () => await prop.changeView("Table View"))
-    await safe("Searching property", async () => await prop.searchProperty("Harbor Bay at MacDill_Liberty Cove (Sample Property 1)"))
+    await safe("Searching property", async () => await prop.searchProperty("The Brook (Sample Property 2)"))
     await safe("Opening View Details", async () => await page.locator('button[title="View Details"]').first().click({ force: true }))
     await safe("Opening Asset Viewer", async () => await page.locator('button:has-text("Asset Viewer")').click({ force: true }))
 
