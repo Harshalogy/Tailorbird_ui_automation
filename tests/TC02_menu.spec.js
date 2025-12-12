@@ -80,15 +80,15 @@ test.describe('Tailorbird Left Panel Flow - Modular', () => {
         Logger.info('[After 2nd Click] aria-expanded = ' + after2);
     });
 
-    test.skip('TC06 @sanity Verify Financials expand/collapse', async () => {
+    test('TC06 @sanity Verify Financials expand/collapse', async () => {
         await helper.runTwoClickTest(page, "Financials");
     });
 
-    test.skip('TC07 @sanity Verify Trackers expand/collapse', async () => {
+    test('TC07 @sanity Verify Trackers expand/collapse', async () => {
         await helper.runTwoClickTest(page, "Trackers");
     });
 
-    test.skip('TC08 @sanity Verify Documents expand/collapse', async () => {
+    test('TC08 @sanity Verify Documents expand/collapse', async () => {
         await helper.runTwoClickTest(page, "Documents");
     });
 
