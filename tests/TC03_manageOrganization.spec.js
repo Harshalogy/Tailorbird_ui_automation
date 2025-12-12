@@ -6,16 +6,20 @@ const data = require('../fixture/organization.json');
 let context, page, org;
 
 test.beforeAll(async ({ browser }) => {
-  context = await browser.newContext({ storageState: 'sessionState.json' });
+  context = await browser.newContext({
+    storageState: 'sessionState.json',
+    recordVideo: { dir: 'videos/' }
+  });
+
   page = await context.newPage();
   org = new OrganizationHelper(page);
+
   await org.goto(data.dashboardUrl);
-  // await org.goto(data.organizationUrl);
-  await org.goToOrganization();  
+  await org.goToOrganization();
 });
 
 test.afterAll(async () => {
-  if (context) await context.close();
+  await context.close();
 });
 
 test.describe('Manage Organization Flow ', () => {

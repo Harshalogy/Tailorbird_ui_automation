@@ -5,11 +5,14 @@ const helper = require('../pages/leftPanel');
 const locators = require('../locators/leftPanelLocator');
 const data = require('../fixture/leftPanel.json');
 
-let context, page;
+let page;
 
-test.beforeAll(async ({ browser }) => {
-    context = await browser.newContext({ storageState: 'sessionState.json' });
-    page = await context.newPage();
+test.use({
+  storageState: 'sessionState.json'
+});
+
+test.beforeEach(async ({ page: testPage }) => {
+    page = testPage;
 
     Logger.info(`Navigating to dashboard: ${process.env.DASHBOARD_URL}`);
     await page.goto(process.env.DASHBOARD_URL, { waitUntil: 'load' });
@@ -19,15 +22,16 @@ test.beforeAll(async ({ browser }) => {
 
 test.afterAll(async () => {
     Logger.info('Closing browser context...');
-    if (context) await context.close();
 });
+
 
 test.describe('Tailorbird Left Panel Flow - Modular', () => {
 
     test('TC03 @sanity Verify all menu options are available', async () => {
         const actualLabels = await helper.getLeftPanelLabels(page);
 
-        if (actualLabels.length === 0) throw new Error('Left panel labels not found.');
+        if (actualLabels.length === 0)
+            throw new Error('Left panel labels not found.');
 
         for (const label of data.expectedLabels) {
             expect(actualLabels).toContain(label);
@@ -40,21 +44,17 @@ test.describe('Tailorbird Left Panel Flow - Modular', () => {
         expect(actualLabels.length).toBeGreaterThan(0);
 
         for (const item of data.menuItems) {
-
             const { label, url } = item;
 
-            // STEP 1 — assert label exists
             expect(actualLabels).toContain(label);
             Logger.info(`✔ Menu item located: ${label}`);
 
-            // STEP 2 — click menu using generic locator (NO getByRole)
             const menuLocator = page.locator(
                 `a.mantine-NavLink-root:has(span.mantine-NavLink-label:has-text("${label}"))`
             );
 
             await menuLocator.click({ timeout: 5000 });
 
-            // STEP 3 — URL validation
             await expect(page).toHaveURL(new RegExp(url.replace(/\//g, "\\/")));
             Logger.info(`🌍 Navigation Valid → "${label}" → matches URL: ${url}`);
         }
