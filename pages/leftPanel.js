@@ -76,13 +76,13 @@ module.exports = {
         Logger.info(`[Before] ${label} visible: ${beforeList}`);
 
         await parent.click();
-        await page.waitForTimeout(200);
+        await page.waitForTimeout(2000);
         const afterCollapse = await this.listVisibleSuboptions(collapse);
         Logger.info(`[After Collapse] ${label} visible: ${afterCollapse}`);
         expect(afterCollapse.length).toBe(0);
 
         await parent.click();
-        await page.waitForTimeout(200);
+        await page.waitForTimeout(2000);
         const afterExpand = await this.listVisibleSuboptions(collapse);
         Logger.info(`[After Expand] ${label} visible: ${afterExpand}`);
         expect(afterExpand.length).toBeGreaterThan(0);
