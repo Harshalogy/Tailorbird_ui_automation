@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "npx playwright test",
+    "sanityRun": "npx playwright test --grep @sanity",
     "test:headed": "npx playwright test --headed ",
     "test:login": "npx playwright test tests/login.spec.js && npx playwright show-report",
     "test:projectJob": "npx playwright test TC02 TC03",
