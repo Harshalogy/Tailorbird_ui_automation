@@ -34,6 +34,8 @@ test('TC30 @regression : User should be able to Open Create Project modal and ve
 });
 
 test('TC31 @regression : User should be able to Fill Create Project form, submit, and verify project details on dashboard', async () => {
+    await projectPage.navigateToProjects();
+    await projectPage.openCreateProjectModal();
     const startDate = await projectPage.getStartDate();
     const endDate = await projectPage.getStartDate();
 
