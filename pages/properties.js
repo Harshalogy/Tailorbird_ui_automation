@@ -1054,6 +1054,7 @@ class PropertiesHelper {
         await addDataButton.waitFor({ state: 'visible' });
         await addDataButton.click();
     }
+
     async addData() {
 
         const nameInputModal = this.page.locator(propertyLocators.nameInputModal);
@@ -1096,7 +1097,7 @@ class PropertiesHelper {
         await expect(newRow).toBeVisible();
 
         // Add Name
-        await this.page.locator(prop.nameCell).dblclick();
+        await this.page.locator(prop.nameCell).first().dblclick();
         await this.page.locator(prop.nameInput).fill("My Test Name");
         await this.page.keyboard.press("Enter");
         await this.page.waitForTimeout(1500);
