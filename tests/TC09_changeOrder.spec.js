@@ -54,13 +54,13 @@ test.describe('Verify Change order tab', () => {
         });
     });
 
-    test('TC68 @regression : Should navigate to Change Order page and verify URL', async () => {
+    test('TC66 @regression : Should navigate to Change Order page and verify URL', async () => {
         Logger.step('Verifying Change Order tab is loaded...');
         await expect(page).toHaveURL(/Change|order|contract/i);
         Logger.success('Change Order tab is loaded successfully.');
     });
 
-    test('TC69 @regression : Should load Change Order page content and not be blank', async () => {
+    test('TC67 @regression : Should load Change Order page content and not be blank', async () => {
         Logger.step('Checking Change Order page content...');
         await page.waitForLoadState('networkidle');
         await page.waitForTimeout(1000);
@@ -69,7 +69,7 @@ test.describe('Verify Change order tab', () => {
         Logger.success('Change Order page content is loaded.');
     });
 
-    test('TC70 @regression : Should show Add Change Order button', async () => {
+    test('TC68 @regression : Should show Add Change Order button', async () => {
         Logger.step('Looking for Add Change Order button...');
         await page.waitForLoadState('networkidle');
         await page.waitForTimeout(2000);
@@ -80,7 +80,7 @@ test.describe('Verify Change order tab', () => {
         Logger.success('Add Change Order button is visible.');
     });
 
-    test('TC71 @regression : Should add new change order and open details page', async () => {
+    test('TC69 @regression : Should add new change order and open details page', async () => {
         Logger.step('Adding new change order...');
         await page.waitForLoadState('networkidle');
         await page.waitForTimeout(2000);
@@ -100,7 +100,7 @@ test.describe('Verify Change order tab', () => {
         }
     });
 
-    test('TC72 @regression : Should enter change order title and required information', async () => {
+    test('TC70 @regression : Should enter change order title and required information', async () => {
         Logger.step('Creating and filling change order details...');
         await page.waitForLoadState('networkidle');
         await page.waitForTimeout(2000);
@@ -119,7 +119,7 @@ test.describe('Verify Change order tab', () => {
         Logger.success('Change order details filled successfully.');
     });
 
-    test('TC73 @regression : Should upload PNG image for change order', async () => {
+    test('TC71 @regression : Should upload PNG image for change order', async () => {
         Logger.step('Uploading PNG image for change order...');
         await page.waitForLoadState('networkidle');
         await page.waitForTimeout(2000);
@@ -147,7 +147,7 @@ test.describe('Verify Change order tab', () => {
         await invoicePage.uploadChangeOrderImage(testImagePath);
     });
 
-    test('TC74 @regression : Should export change order data', async () => {
+    test('TC72 @regression : Should export change order data', async () => {
         Logger.step('Exporting change order data...');
         await page.waitForLoadState('networkidle');
         await page.waitForTimeout(2000);
@@ -160,7 +160,7 @@ test.describe('Verify Change order tab', () => {
         }
     });
 
-    test('TC75 @regression : Should add data to change order and save', async () => {
+    test('TC73 @regression : Should add data to change order and save', async () => {
         Logger.step('Adding data to change order and saving...');
         await page.waitForLoadState('networkidle');
         await page.waitForTimeout(2000);
@@ -186,7 +186,7 @@ test.describe('Verify Change order tab', () => {
         }
     });
 
-    test('TC76 @regression : Should verify change order was added to list', async () => {
+    test('TC74 @regression : Should verify change order was added to list', async () => {
         Logger.step('Verifying change order was added to the list...');
         await page.waitForLoadState('networkidle');
         await page.waitForTimeout(2000);
