@@ -11,7 +11,7 @@ exports.ProjectJob = class ProjectJob {
         this.page = page;
         this.locators = projectJobLocators(page);
         this.prop = new PropertiesHelper(page);
-        
+
     }
 
     async navigateToJobsTab() {
@@ -169,19 +169,53 @@ exports.ProjectJob = class ProjectJob {
         }
     }
 
+    // async inviteVendorsToBid() {
+    //     try {
+    //         Logger.step('Inviting Vendors to Bid...');
+    //         const addVendorsButton = this.page.getByRole('button', { name: 'Add Vendors' });
+
+    //         await expect(this.addVendorsButton).toBeVisible({ timeout: 10000 });
+    //         await expect(this.addVendorsButton).toBeEnabled();
+    //         await this.addVendorsButton.click();
+
+    //         if (!(await this.locators.inviteVendorsToBidButton.isVisible())) {
+    //             await this.locators.manageVendorsToggle.click();
+    //         }
+    //         await this.locators.inviteVendorsToBidButton.click();
+    //         await this.page.waitForTimeout(4000);
+    //     } catch (error) {
+    //         Logger.step(`Error in inviteVendorsToBid: ${error.message}`);
+    //         throw error;
+    //     }
+    // }
+
     async inviteVendorsToBid() {
         try {
             Logger.step('Inviting Vendors to Bid...');
-            if (!(await this.locators.inviteVendorsToBidButton.isVisible())) {
+
+            const addVendorsButton = this.page.getByRole('button', { name: /add vendors/i });
+
+            // If Add Vendors button is not visible, expand Manage Vendors panel
+            if (!(await addVendorsButton.isVisible())) {
+                Logger.step('Add Vendors button not visible, opening Manage Vendors panel...');
                 await this.locators.manageVendorsToggle.click();
             }
-            await this.locators.inviteVendorsToBidButton.click();
-            await this.page.waitForTimeout(4000);
+
+            await expect(addVendorsButton).toBeVisible({ timeout: 15000 });
+            await expect(addVendorsButton).toBeEnabled();
+
+            await addVendorsButton.scrollIntoViewIfNeeded();
+            await addVendorsButton.click();
+            await this.page.waitForTimeout(3000);
+
+            
+
         } catch (error) {
             Logger.step(`Error in inviteVendorsToBid: ${error.message}`);
             throw error;
         }
     }
+
 
     async verifyBidTemplate() {
         try {
@@ -387,7 +421,7 @@ exports.ProjectJob = class ProjectJob {
     async openFilterPanel() {
         try {
             Logger.step('Opening filter panel...');
-              await this.page.getByRole('button').filter({ has: this.page.locator('svg.lucide-funnel') }).click();
+            await this.page.getByRole('button').filter({ has: this.page.locator('svg.lucide-funnel') }).click();
             await this.page.waitForTimeout(1000);
         } catch (error) {
             Logger.step(`Error in openFilterPanel: ${error.message}`);

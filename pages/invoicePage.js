@@ -8,37 +8,36 @@ class InvoicePage {
     constructor(page) {
         this.page = page;
 
-        // Add Invoice button
-        this.addInvoiceButton = page.locator('button:has-text("Invoice")').last();
+        // Add Invoice button - navigates to invoice creation page
+        this.addInvoiceButton = page.getByRole('button', { name: 'Invoice', exact: true });
 
         // Add Change Order button
-        this.addChangeOrderButton = page.locator('button:has-text("Change Order")').last();
+        this.addChangeOrderButton = page.getByRole('button', { name: 'Change Order' }).last();
 
-        // Invoice table/grid
-        this.invoiceTable = page.locator('[role="grid"]');
-        this.invoiceRows = page.locator('[role="row"]');
-        this.invoiceTab = page.locator('.mantine-Tabs-tabLabel:has-text("Invoice")');
-        this.changeOrderTab = page.locator('.mantine-Tabs-tabLabel:has-text("Change Orders")');
+        // Invoice table/grid - AG Grid structure
+        // Multiple selectors for robustness - use locator with filter to find the invoice grid
+        this.invoiceTable = page.locator('[role="grid"]').filter({ hasText: 'Invoice Number' }).first();
+        this.invoiceRows = page.locator('[role="grid"]').filter({ hasText: 'Invoice Number' }).locator('[role="row"]');
+        this.invoiceTab = page.getByRole('tab', { name: 'Invoice' });
+        this.changeOrderTab = page.getByRole('tab', { name: 'Change Orders' });
 
-        // Invoice detail form selectors
-        this.titleInput = page.locator('input[placeholder*="Title"], input[placeholder*="title"], input[name*="title"]').first();
-        this.amountInput = page.locator('input[placeholder*="Amount"], input[placeholder*="amount"], input[name*="amount"]').first();
-        this.descriptionInput = page.locator('textarea, input[placeholder*="Description"], input[placeholder*="description"]').first();
+        // Invoice detail form selectors (on invoice detail page)
+        this.titleInput = page.locator('textbox[placeholder="Enter title"]').or(page.locator('input[placeholder*="title"]')).first();
+        this.amountInput = page.locator('input[type="number"]').or(page.locator('input[placeholder*="amount"]')).first();
+        this.descriptionInput = page.locator('textbox[placeholder="Enter description"]').or(page.locator('textarea')).first();
 
         // File upload
         this.fileUploadInput = page.locator('input[type="file"]');
-        this.uploadButton = page.locator('button:has-text("Upload"), label:has-text("Upload")').first();
+        this.uploadButton = page.locator('button').filter({ hasText: /upload|Upload/i }).first();
 
         // Buttons
-        this.saveButton = page.locator('button:has-text("Save"), button:has-text("Confirm"), button:has-text("Submit")').first();
-        this.cancelButton = page.locator('button:has-text("Cancel")').first();
-        this.deleteButton = page.locator('button:has-text("Delete")').first();
-
-        // Modal/Dialog
-        this.modal = page.locator('dialog, [role="dialog"], .mantine-Modal-root').first();
+        this.saveButton = page.getByRole('button', { name: /save|confirm|submit/i }).first();
+        this.cancelButton = page.getByRole('button', { name: 'Cancel' }).or(page.getByRole('button', { name: 'Go Back' })).first();
+        this.deleteButton = page.getByRole('button', { name: /delete/i }).first();
+        this.goBackButton = page.getByRole('button', { name: 'Go Back' });
 
         // View Invoice button
-        this.viewInvoiceButton = page.locator('button[title="View Invoice"]').first();
+        this.viewInvoiceButton = page.getByRole('button', { name: 'View Invoice' }).first();
 
         // Success message
         this.successMessage = page.locator('text=/[Ss]uccess|[Cc]ompleted|[Ss]aved/').first();
@@ -48,6 +47,12 @@ class InvoicePage {
         this.approvedInvoiceAmount = page.locator('text=Approved Invoices').locator('..').locator('p').first();
         this.contractRemaining = page.locator('text=Contract Remaining').locator('..').locator('p').first();
         this.pendingInvoiceAmount = page.locator('text=Pending Invoices').locator('..').locator('p').first();
+    }
+
+    // Getter to ensure fresh dialog locator - uses multiple selectors for robustness
+    get modal() {
+        // Try multiple selectors to find the dialog/modal
+        return this.page.locator('dialog, [role="dialog"]').first();
     }
 
     async navigateToInvoices(jobUrl) {
@@ -67,9 +72,25 @@ class InvoicePage {
         try {
             Logger.step('Clicking Add Invoice button...');
             await this.addInvoiceButton.waitFor({ state: 'visible', timeout: 10000 });
+            
+            // Get current URL to verify navigation
+            const currentUrl = this.page.url();
+            Logger.info(`Current URL before click: ${currentUrl}`);
+            
+            // Click the button - it will navigate to invoice details page
             await this.addInvoiceButton.click();
+            
+            // Wait for navigation to invoice details page (or just wait for page load if already there)
+            try {
+                await this.page.waitForURL(/\/invoices\/\d+/, { timeout: 5000 });
+            } catch {
+                Logger.info('Already on or navigating to invoice page');
+            }
+            
+            // Wait for the page to be fully loaded
             await this.page.waitForLoadState('networkidle');
             await this.page.waitForTimeout(1000);
+            
             Logger.success('Add Invoice button clicked.');
         } catch (error) {
             Logger.error(`Error clicking Add Invoice: ${error.message}`);
@@ -80,11 +101,20 @@ class InvoicePage {
     async fillInvoiceTitle(title) {
         try {
             Logger.step(`Filling invoice title: ${title}`);
-            if (await this.titleInput.isVisible({ timeout: 5000 }).catch(() => false)) {
-                await this.titleInput.fill(title);
+            // Try multiple selectors for title input
+            let titleInputElement = await this.page.locator('textbox[placeholder="Enter title"]').first().isVisible({ timeout: 2000 }).catch(() => false);
+            
+            if (!titleInputElement) {
+                titleInputElement = await this.page.locator('input[placeholder*="title"]').first().isVisible({ timeout: 2000 }).catch(() => false);
+            }
+            
+            if (titleInputElement) {
+                const input = this.page.locator('textbox[placeholder="Enter title"]').or(this.page.locator('input[placeholder*="title"]')).first();
+                await input.fill(title);
+                await input.blur();
                 Logger.success(`Invoice title filled: ${title}`);
             } else {
-                Logger.info('Title input not found');
+                Logger.info('Title input not found - may not be visible yet');
             }
         } catch (error) {
             Logger.error(`Error filling title: ${error.message}`);
@@ -94,15 +124,13 @@ class InvoicePage {
 
     async fillInvoiceAmount(amount) {
         try {
-            Logger.step(`Filling invoice amount: ${amount}`);
-            if (await this.amountInput.isVisible({ timeout: 5000 }).catch(() => false)) {
-                await this.amountInput.fill(amount);
-                Logger.success(`Invoice amount filled: ${amount}`);
-            } else {
-                Logger.info('Amount input not found');
-            }
+            Logger.step(`Attempting to fill invoice amount: ${amount}`);
+            // Note: The invoice form does not have an amount input field
+            // Amount is determined by the selected items in the invoice grid
+            Logger.info('Amount is not directly fillable - it is calculated from invoice items');
+            return true;
         } catch (error) {
-            Logger.error(`Error filling amount: ${error.message}`);
+            Logger.error(`Error with amount: ${error.message}`);
             throw error;
         }
     }
@@ -110,11 +138,15 @@ class InvoicePage {
     async fillInvoiceDescription(description) {
         try {
             Logger.step(`Filling invoice description: ${description}`);
-            if (await this.descriptionInput.isVisible({ timeout: 5000 }).catch(() => false)) {
-                await this.descriptionInput.fill(description);
+            // Look for description input in the Overview section
+            const descInputElement = this.page.locator('input[placeholder="Enter description"], textarea[placeholder="Enter description"]').first();
+            
+            if (await descInputElement.isVisible({ timeout: 5000 }).catch(() => false)) {
+                await descInputElement.fill(description);
+                await descInputElement.blur();
                 Logger.success(`Invoice description filled: ${description}`);
             } else {
-                Logger.info('Description input not found');
+                Logger.info('Description input not found in visible form');
             }
         } catch (error) {
             Logger.error(`Error filling description: ${error.message}`);
@@ -142,15 +174,28 @@ class InvoicePage {
     async saveInvoice() {
         try {
             Logger.step('Saving invoice...');
-            if (await this.saveButton.isVisible({ timeout: 5000 }).catch(() => false)) {
-                await this.saveButton.click();
+            // Look for save/confirm button on invoice detail page
+            let saveBtn = await this.page.getByRole('button').filter({ hasText: /save|confirm|submit/i }).first().isVisible({ timeout: 3000 }).catch(() => false);
+            
+            if (saveBtn) {
+                await this.page.getByRole('button').filter({ hasText: /save|confirm|submit/i }).first().click();
                 await this.page.waitForLoadState('networkidle');
-                await this.page.waitForTimeout(1000);
+                await this.page.waitForTimeout(1500);
                 Logger.success('Invoice saved successfully.');
                 return true;
             } else {
-                Logger.info('Save button not found');
-                return false;
+                // Try to find save action button
+                const actionButton = await this.page.locator('button').filter({ hasText: /save|confirm/i }).first().isVisible({ timeout: 3000 }).catch(() => false);
+                if (actionButton) {
+                    await this.page.locator('button').filter({ hasText: /save|confirm/i }).first().click();
+                    await this.page.waitForLoadState('networkidle');
+                    await this.page.waitForTimeout(1500);
+                    Logger.success('Invoice saved successfully.');
+                    return true;
+                } else {
+                    Logger.info('Save button not found');
+                    return false;
+                }
             }
         } catch (error) {
             Logger.error(`Error saving invoice: ${error.message}`);
@@ -160,7 +205,11 @@ class InvoicePage {
 
     async isModalOpen() {
         try {
-            return await this.modal.isVisible({ timeout: 3000 }).catch(() => false);
+            // Check if we're on an invoice details page (which shows as a dialog)
+            const isOnInvoicePage = this.page.url().includes('/invoices/');
+            const isDialogVisible = await this.page.locator('dialog').isVisible({ timeout: 2000 }).catch(() => false);
+            
+            return isOnInvoicePage || isDialogVisible;
         } catch (error) {
             Logger.error(`Error checking modal: ${error.message}`);
             return false;
@@ -169,16 +218,18 @@ class InvoicePage {
 
     async closeModal() {
         try {
-            Logger.step('Closing modal...');
-            if (await this.cancelButton.isVisible({ timeout: 3000 }).catch(() => false)) {
-                await this.cancelButton.click();
-                await this.page.waitForTimeout(500);
-                Logger.success('Modal closed.');
-            } else {
-                // Try pressing Escape key
-                await this.page.keyboard.press('Escape');
-                Logger.success('Closed modal with Escape key.');
-            }
+            Logger.step('Closing invoice details page...');
+            
+            // Try pressing Escape key first (most reliable)
+            await this.page.keyboard.press('Escape');
+            await this.page.waitForLoadState('networkidle');
+            await this.page.waitForTimeout(800);
+            Logger.success('Closed invoice details page with Escape key.');
+            
+            // Ensure we're back on the Invoice tab
+            await this.navigateToInvoiceTab().catch(() => {
+                Logger.info('Could not navigate to Invoice tab after close');
+            });
         } catch (error) {
             Logger.error(`Error closing modal: ${error.message}`);
             throw error;
@@ -225,25 +276,41 @@ class InvoicePage {
     async navigateToInvoiceTab() {
         try {
             Logger.step('Navigating to Invoice tab...');
-            await expect(this.invoiceTab).toBeEnabled();
-            await this.invoiceTab.click();
+            const invoiceTab = this.page.getByRole('tab', { name: 'Invoice' });
+            await invoiceTab.waitFor({ state: 'visible', timeout: 10000 });
+            await invoiceTab.click();
             await this.page.waitForLoadState('networkidle');
-            await this.page.waitForTimeout(3000);
+            await this.page.waitForURL(/tab=invoices/);
+            await this.page.waitForTimeout(2000);
+            Logger.success('Navigated to Invoice tab successfully.');
         } catch (error) {
-            Logger.step(`Error in navigateToInvoiceTab: ${error.message}`);
+            Logger.error(`Error in navigateToInvoiceTab: ${error.message}`);
             throw error;
         }
     }
 
-     async navigateToChangeOrderTab() {
+    async navigateToChangeOrderTab() {
         try {
             Logger.step('Navigating to Change Order tab...');
-            await expect(this.changeOrderTab).toBeEnabled();
-            await this.changeOrderTab.click();
+            // Try multiple selectors to find Change Orders tab
+            let changeOrderTab = await this.page.locator('[role="tab"]:has-text("Change Orders")').first().isVisible({ timeout: 3000 }).catch(() => false);
+            
+            if (!changeOrderTab) {
+                changeOrderTab = await this.page.locator('button, [role="tab"]').filter({ hasText: 'Change Orders' }).first().isVisible({ timeout: 3000 }).catch(() => false);
+            }
+            
+            if (changeOrderTab) {
+                await this.page.locator('[role="tab"]:has-text("Change Orders")').or(this.page.locator('button').filter({ hasText: 'Change Orders' })).first().click();
+            } else {
+                Logger.info('Change Orders tab not found, trying generic tab selector');
+                await this.page.getByRole('tab').filter({ hasText: /Change Order/ }).click();
+            }
+            
             await this.page.waitForLoadState('networkidle');
-            await this.page.waitForTimeout(3000);
+            await this.page.waitForTimeout(2000);
+            Logger.success('Navigated to Change Order tab successfully.');
         } catch (error) {
-            Logger.step(`Error in navigateToChangeOrderTab: ${error.message}`);
+            Logger.error(`Error in navigateToChangeOrderTab: ${error.message}`);
             throw error;
         }
     }

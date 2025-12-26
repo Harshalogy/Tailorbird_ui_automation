@@ -908,7 +908,7 @@ class PropertiesHelper {
                 await qtyCell.dblclick();
                 console.log("✔ unit_mix_quantity cell activated for editing");
 
-                await qtyCell.locator('input').fill('100',{delay:50});
+                await qtyCell.locator('input').fill('100', { delay: 50 });
                 await qtyCell.locator('input').press('Enter');
                 console.log("✔ Quantity set → 100");
 
@@ -1054,7 +1054,6 @@ class PropertiesHelper {
         await addDataButton.waitFor({ state: 'visible' });
         await addDataButton.click();
     }
-
     async addData() {
 
         const nameInputModal = this.page.locator(propertyLocators.nameInputModal);
@@ -1097,7 +1096,7 @@ class PropertiesHelper {
         await expect(newRow).toBeVisible();
 
         // Add Name
-        await this.page.locator(prop.nameCell).first().dblclick();
+        await this.page.locator(prop.nameCell).dblclick();
         await this.page.locator(prop.nameInput).fill("My Test Name");
         await this.page.keyboard.press("Enter");
         await this.page.waitForTimeout(1500);
@@ -1297,25 +1296,83 @@ class PropertiesHelper {
         // await expect(viewDropdown).toBeDisabled();     // Initially disabled
     }
 
+    // async validateJobDetails(fields) {
+    //     const jobFields = [
+    //         { label: "Job Name", value: fields["Job Name"] },
+    //         { label: "Job Type", value: fields["Job Type"] },
+    //         { label: "Description", value: fields["Description"] }
+    //     ];
+
+    //     for (const field of jobFields) {
+    //         const labelEl = this.page.locator(`text="${field.label}"`).first();
+    //         const valueEl = labelEl.locator('xpath=..//following-sibling::div//p').first();
+    //         await expect(valueEl).toBeVisible({ timeout: 10000 });
+
+    //         console.log(`[ASSERT] ${field.label} → Expected: ${field.value}`);
+
+    //         await expect(valueEl).toHaveText(String(field.value), { timeout: 10000 });
+    //     }
+    // }
+
     async validateJobDetails(fields) {
+        // 1. Locate the job overview card using Job Name
+        const jobCard = this.page
+            .locator('div[data-with-border="true"]')
+            .filter({ hasText: fields["Job Name"] });
+
+        // Assert job card visibility
+        await expect(jobCard, `Job card not visible for ${fields["Job Name"]}`)
+            .toBeVisible({ timeout: 10000 });
+
+        // 2. Define fields to validate
         const jobFields = [
             { label: "Job Name", value: fields["Job Name"] },
             { label: "Job Type", value: fields["Job Type"] },
             { label: "Description", value: fields["Description"] }
         ];
 
+        // 3. Validate each field
         for (const field of jobFields) {
-            const labelEl = this.page.locator(`text="${field.label}"`).first();
-            const valueEl = labelEl.locator('xpath=..//following-sibling::div//p').first();
-            await expect(valueEl).toBeVisible({ timeout: 10000 });
-
             console.log(`[ASSERT] ${field.label} → Expected: ${field.value}`);
 
-            await expect(valueEl).toHaveText(String(field.value), { timeout: 10000 });
+            // Locate label <p> inside the same job card
+            const labelEl = jobCard
+                .locator('p', { hasText: new RegExp(`^${field.label}$`) })
+                .first();
+
+            await expect(
+                labelEl,
+                `Label "${field.label}" not found in job overview`
+            ).toBeVisible({ timeout: 10000 });
+
+            // Locate value <p> within the same wrapper div
+            const valueEl = labelEl.locator('xpath=parent::div/p[2]');
+
+            await expect(
+                valueEl,
+                `Value for "${field.label}" not visible`
+            ).toBeVisible({ timeout: 10000 });
+
+            await expect(
+                valueEl,
+                `Incorrect value for "${field.label}"`
+            ).toHaveText(String(field.value), { timeout: 10000 });
         }
+
+        // 4. Assert Edit button exists and is enabled
+        const editButton = jobCard.getByRole('button', { name: 'Edit' });
+
+        await expect(editButton, 'Edit button not visible')
+            .toBeVisible({ timeout: 10000 });
+
+        await expect(editButton, 'Edit button is disabled')
+            .toBeEnabled();
     }
 
-     async clearSearch(name){
+
+
+
+    async clearSearch(name) {
         await this.page.locator('input[placeholder="Search..."]').fill(name);
         await this.page.waitForLoadState("networkidle");
         await this.page.waitForTimeout(3000);

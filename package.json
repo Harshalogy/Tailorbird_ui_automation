@@ -10,7 +10,16 @@
     "test:login": "npx playwright test tests/login.spec.js && npx playwright show-report",
     "test:projectJob": "npx playwright test TC02 TC03",
     "test:full": "npm install && npx playwright install && npx playwright test --headed",
-    "test:fullProperty": "npm install && npx playwright install && cross-env OPTION=\"Creekstone at RTP\" npx playwright test TC02 --headed"
+    "test:fullProperty": "npm install && npx playwright install && cross-env OPTION=\"Creekstone at RTP\" npx playwright test TC02 --headed",
+    "test:loginLogout": "npx playwright test TC01",
+    "test:menuNavigation": "npx playwright test TC02",
+    "test:manageOrganizations": "npx playwright test TC03",
+    "test:propertiesManagement": "npx playwright test TC04",
+    "test:projectsManagement": "npx playwright test TC05",
+    "test:jobsManagement": "npx playwright test TC06",
+    "test:categoryManagement": "npx playwright test TC07",
+    "test:invoice": "npx playwright test TC08",
+    "test:changeOrders": "npx playwright test TC09"
   },
   "repository": {
     "type": "git",

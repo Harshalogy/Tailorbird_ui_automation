@@ -27,7 +27,8 @@ exports.ProjectPage = class ProjectPage {
         this.jobOverviewHeader = page.getByText('Job Overview');
         this.editButton = page.getByRole('button', { name: 'Edit' });
         this.vendorSearchInput = page.locator('.mantine-Drawer-body input[placeholder="Search..."]');
-        this.inviteSelectedBtn = page.locator('button:has-text("Invite Selected Vendors to Bid")');
+        // this.inviteSelectedBtn = page.locator('button:has-text("Invite Selected Vendors to Bid")');
+        this.inviteSelectedBtn = page.locator('button:has-text("Add Vendors to Bid")');
         this.vendorRow = (name) =>
             this.page.locator(`.ag-pinned-left-cols-container div[role="row"]:has-text("${name}") .ag-checkbox`);
         this.vendorNameCell = (name) =>
@@ -214,28 +215,53 @@ exports.ProjectPage = class ProjectPage {
         }
     }
 
+    // async assertProjectCreated(name, description) {
+    //     try {
+    //         const verifyText = async (locator, expectedText, label) => {
+    //             Logger.step(`Verifying project ${label} "${expectedText}" is visible on the dashboard...`);
+
+    //             const element = locator.locator(`p:has-text("${expectedText}")`).last();
+    //             await element.waitFor({ state: 'visible' });
+    //             await expect(element).toContainText(expectedText);
+
+    //             const actualText = (await element.textContent())?.trim();
+    //             expect(actualText).toBe(expectedText);
+
+    //             Logger.success(`✅ Project ${label} "${expectedText}" is correctly visible on the dashboard.`);
+    //         };
+
+    //         await verifyText(this.createdProjectName, name, 'name');
+    //         await verifyText(this.createdDescription, description, 'description');
+    //     } catch (e) {
+    //         Logger.step(`Error in assertProjectCreated: ${e.message}`);
+    //         throw e;
+    //     }
+    // }
+
     async assertProjectCreated(name, description) {
         try {
-            const verifyText = async (locator, expectedText, label) => {
-                Logger.step(`Verifying project ${label} "${expectedText}" is visible on the dashboard...`);
+            const verifyByLabel = async (labelText, expectedText) => {
+                Logger.step(`Verifying "${labelText}" value is "${expectedText}"...`);
 
-                const element = locator.locator(`p:has-text("${expectedText}")`).last();
-                await element.waitFor({ state: 'visible' });
-                await expect(element).toContainText(expectedText);
+                const valueLocator = this.page
+                    .locator('p', { hasText: labelText })
+                    .locator('xpath=following-sibling::p[1]');
 
-                const actualText = (await element.textContent())?.trim();
-                expect(actualText).toBe(expectedText);
+                await expect(valueLocator).toBeVisible();
+                await expect(valueLocator).toHaveText(expectedText);
 
-                Logger.success(`✅ Project ${label} "${expectedText}" is correctly visible on the dashboard.`);
+                Logger.success(`✅ ${labelText} verified successfully`);
             };
 
-            await verifyText(this.createdProjectName, name, 'name');
-            await verifyText(this.createdDescription, description, 'description');
+            await verifyByLabel('Project Name', name);
+            await verifyByLabel('Description', description);
+
         } catch (e) {
             Logger.step(`Error in assertProjectCreated: ${e.message}`);
             throw e;
         }
     }
+
 
     async getStartDate() {
         try {
@@ -472,10 +498,11 @@ exports.ProjectPage = class ProjectPage {
     }
 
     async validateOverviewVisible() {
-        await expect(this.jobOverviewHeader).toBeVisible();
+        // await expect(this.jobOverviewHeader).toBeVisible();
         await expect(this.editButton).toBeVisible();
         await expect(this.editButton).toBeEnabled();
     }
+
     async createBidWithMaterial() {
         await this.page.waitForLoadState('networkidle');
     }

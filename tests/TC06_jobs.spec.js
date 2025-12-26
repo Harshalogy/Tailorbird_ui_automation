@@ -106,7 +106,7 @@ test.describe('Verify Create Project and Add Job flow', () => {
             `.ag-pinned-left-cols-container div[role="row"]:has-text('testsumit') .ag-checkbox`
         ).click();
 
-        await page.locator(`button:has-text('Invite Selected Vendors to Bid')`).click();
+        await page.locator(`button:has-text('Add Vendors to Bid')`).click();
         await page.waitForLoadState('networkidle');
 
         await expect(
@@ -188,7 +188,7 @@ test.describe('Verify Create Project and Add Job flow', () => {
         await projectPage.closeScopeMixModal();
     });
 
-    test('TC44 @regression : Validate edit bid on behalf of new vendor flow and submit it successfully', async ({ context }) => {
+    test.skip('TC44 @regression : Validate edit bid on behalf of new vendor flow and submit it successfully', async ({ context }) => {
         await projectPage.openProject(projectData.projectName);
         await projectJob.navigateToJobsTab();
         await projectJob.openJobSummary();

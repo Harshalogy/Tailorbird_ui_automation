@@ -10,6 +10,13 @@ const ModalHandler = require('../pages/modalHandler');
 const loc = require('../locators/locationLocator');
 import { propertyLocators } from '../locators/propertyLocator.js';
 
+test.use({
+  storageState: 'sessionState.json',
+  video: 'retain-on-failure',
+  trace: 'retain-on-failure',
+  screenshot: 'only-on-failure'
+});
+
 const propertyTypes = [
   "Garden Style",
   "Mid Rise",
@@ -274,7 +281,7 @@ test.describe('PROPERTY FLOW TEST SUITE', () => {
 
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(3000);
-    
+
     log("Getting Asset Viewer panel id...")
     let tab = page.locator('button:has-text("Asset Viewer")')
     let id = await tab.getAttribute("aria-controls")
